@@ -10,7 +10,7 @@ export default function Dashboard() {
           <Link href="/Courses/4550" className="wd-dashboard-course-link">
             <Image src="/images/webdev.jpg" width={200} height={150} alt="web dev image"/>
             <div>
-              <h5> CS4550 </h5>
+              <h5> CS4550 Web Development </h5>
               <p className="wd-dashboard-web-dev">
               Full Stack software developer
               </p>
