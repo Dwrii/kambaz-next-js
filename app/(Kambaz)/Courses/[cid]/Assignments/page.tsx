@@ -49,25 +49,53 @@ export default function Assignments() {
       <h3 id="wd-quizzes-title">
         QUIZZES 10% of Total <button>+</button>
       </h3>
-      <ul id="wd-quizzes-list">
-        <li className="wd-quizzes-list-item">
-          <p> (No quizzes yet) </p>
+      <ul id="wd-quiz-list">
+        <li className="wd-quiz-list-item">
+          <Link
+            href="/Courses/4550/Assignments/q1"
+            className="wd-assignment-link"
+          >
+            Q1 - HTML Basics
+          </Link>
+          <div>
+            <b>Not available until</b> May 12 at 12:00am | <b>Due</b> May 13 at
+            11:59pm | 20 pts
+          </div>
         </li>
       </ul>
       <h3 id="wd-exams-title">
         EXAMS 30% of Total <button>+</button>
       </h3>
-      <ul id="wd-exams-list">
-        <li className="wd-exams-list-item">
-          <p> (No exams yet) </p>
+      <ul id="wd-exam-list">
+        <li className="wd-exam-list-item">
+          <Link
+            href="/Courses/4550/Assignments/exam1"
+            className="wd-assignment-link"
+          >
+            Exam
+          </Link>
+          <div>
+            <b>Not available until</b> Sep 25 at 12:00am | <b>Due</b> Sep 25 at
+            11:59pm | 100 pts
+          </div>
         </li>
       </ul>
+
       <h3 id="wd-project-title">
         PROJECT 20% of Total <button>+</button>
       </h3>
       <ul id="wd-project-list">
         <li className="wd-project-list-item">
-          <p> (No project yet) </p>
+          <Link
+            href="/Courses/4550/Assignments/final"
+            className="wd-assignment-link"
+          >
+            Final Project
+          </Link>
+          <div>
+            Group project | <b>Not available until</b> May 6 at 12:00am |
+            <b>Due</b> Jun 12 at 11:59pm | 100 pts
+          </div>
         </li>
       </ul>
     </div>
