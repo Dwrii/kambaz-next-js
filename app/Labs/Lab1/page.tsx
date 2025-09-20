@@ -3,6 +3,11 @@ export default function Lab1() {
   return (
     <div id="wd-lab1">
       <h2>Lab 1</h2>
+      <p>
+        <strong>
+            Rui Wu - Sections 11597
+        </strong>
+      </p>
       <h3>HTML Examples</h3>
       <div id="wd-h-tag">
         <h4>Heading Tags</h4>
