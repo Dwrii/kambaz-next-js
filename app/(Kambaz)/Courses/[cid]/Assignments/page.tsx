@@ -1,103 +1,68 @@
-import Link from "next/link";
+"use client";
+
+import Button from "react-bootstrap/Button";
+import FormControl from "react-bootstrap/FormControl";
+import { FaSearch, FaPlus } from "react-icons/fa";
+import { BsGripVertical } from "react-icons/bs";
+import AssignmentItem from "./AssignmentItem";
+
 export default function Assignments() {
   return (
-    <div id="wd-assignments">
-      <input placeholder="Search for Assignments" id="wd-search-assignment" />
-      <button id="wd-add-assignment-group">+ Group</button>
-      <button id="wd-add-assignment">+ Assignment</button>
-      <h3 id="wd-assignments-title">
-        ASSIGNMENTS 40% of Total <button>+</button>
-      </h3>
-      <ul id="wd-assignment-list">
-        <li className="wd-assignment-list-item">
-          <Link
-            href="/Courses/1234/Assignments/123"
-            className="wd-assignment-link"
-          >
-            A1 - ENV + HTML
-          </Link>
-          <p className="wd-assignment-instructions">
-            Multiple Modules | <b>Not available until</b> May 6 at 12:00am |
-            <b>Due</b> May 13 at 11:59pm | 100 pts
-          </p>
-        </li>
-        <li className="wd-assignment-list-item">
-          <Link
-            href="/Courses/1234/Assignments/123"
-            className="wd-assignment-link"
-          >
-            A2 - CSS + BOOSTSTRAP
-          </Link>
-          <p className="wd-assignment-instructions">
-            Multiple Modules | <b>Not available until</b> May 13 at 12:00am |
-            <b>Due</b> May 20 at 11:59pm | 100 pts
-          </p>
-        </li>
-        <li className="wd-assignment-list-item">
-          <Link
-            href="/Courses/1234/Assignments/123"
-            className="wd-assignment-link"
-          >
-            A3 - JAVASCRIPT + REACT
-          </Link>
-          <p className="wd-assignment-instructions">
-            Multiple Modules | <b>Not available until</b> May 20 at 12:00am |
-            <b>Due</b> May 27 at 11:59pm | 100 pts
-          </p>
-        </li>
-      </ul>
-      <h3 id="wd-quizzes-title">
-        QUIZZES 10% of Total <button>+</button>
-      </h3>
-      <ul id="wd-quiz-list">
-        <li className="wd-quiz-list-item">
-          <Link
-            href="/Courses/4550/Assignments/q1"
-            className="wd-assignment-link"
-          >
-            Q1 - HTML Basics
-          </Link>
-          <div>
-            <b>Not available until</b> May 12 at 12:00am | <b>Due</b> May 13 at
-            11:59pm | 20 pts
-          </div>
-        </li>
-      </ul>
-      <h3 id="wd-exams-title">
-        EXAMS 30% of Total <button>+</button>
-      </h3>
-      <ul id="wd-exam-list">
-        <li className="wd-exam-list-item">
-          <Link
-            href="/Courses/4550/Assignments/exam1"
-            className="wd-assignment-link"
-          >
-            Exam
-          </Link>
-          <div>
-            <b>Not available until</b> Sep 25 at 12:00am | <b>Due</b> Sep 25 at
-            11:59pm | 100 pts
-          </div>
-        </li>
-      </ul>
+    <div id="wd-assignments" className="p-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex align-items-center" style={{ maxWidth: "300px" }}>
+          <FaSearch className="me-2 text-secondary fs-5" />
+          <FormControl
+            type="text"
+            placeholder="Search..."
+            id="wd-search-assignments"
+            className="fs-6"
+          />
+        </div>
+        <div>
+          <Button variant="secondary" className="me-2 fs-6" id="wd-add-group">
+            <FaPlus className="me-1" /> Group
+          </Button>
+          <Button variant="danger" className="fs-6" id="wd-add-assignment">
+            <FaPlus className="me-1" /> Assignment
+          </Button>
+        </div>
+      </div>
 
-      <h3 id="wd-project-title">
-        PROJECT 20% of Total <button>+</button>
-      </h3>
-      <ul id="wd-project-list">
-        <li className="wd-project-list-item">
-          <Link
-            href="/Courses/4550/Assignments/final"
-            className="wd-assignment-link"
-          >
-            Final Project
-          </Link>
-          <div>
-            Group project | <b>Not available until</b> May 6 at 12:00am |
-            <b>Due</b> Jun 12 at 11:59pm | 100 pts
-          </div>
-        </li>
-      </ul>
+      <div className="bg-secondary text-dark p-3 d-flex justify-content-between align-items-center fs-5">
+        <span>
+          <BsGripVertical className="me-2 fs-4" />
+          ASSIGNMENTS
+        </span>
+        <span className="badge bg-light text-dark border">40% of Total</span>
+      </div>
+
+      <div className="fs-6">
+        <AssignmentItem
+          title="A1 - ENV + HTML"
+          href="/Courses/1234/Assignments/a1"
+          details='
+            <span class="text-danger">Multiple Modules</span> | 
+            <b>Not available until</b> May 6 at 12:00am | 
+            <b>Due</b> May 13 at 11:59pm | 100 pts'
+        />
+        <AssignmentItem
+          title="A2 - CSS + Bootstrap"
+          href="/Courses/1234/Assignments/a2"
+          details='
+            <span class="text-danger">Multiple Modules</span> | 
+            <b>Not available until</b> May 13 at 12:00am | 
+            <b>Due</b> May 20 at 11:59pm | 100 pts'
+        />
+        <AssignmentItem
+          title="A3 - JavaScript + React"
+          href="/Courses/1234/Assignments/a3"
+          details='
+            <span class="text-danger">Multiple Modules</span> | 
+            <b>Not available until</b> May 20 at 12:00am | 
+            <b>Due</b> May 27 at 11:59pm | 100 pts'
+        />
+      </div>
     </div>
   );
 }
