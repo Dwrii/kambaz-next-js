@@ -1,24 +1,41 @@
-"use client"
+"use client";
+
 import ModulesControls from "./ModulesControls";
 import { ListGroup, ListGroupItem } from "react-bootstrap";
-import { BsGripVertical } from "react-icons/bs"; 
+import { BsGripVertical } from "react-icons/bs";
 import ModuleControlButtons from "./ModulesControlButtons";
 import LessonControlButtons from "./LessonControlButtons";
 import { useParams } from "next/navigation";
 import * as db from "../../../Database";
 
+interface Lesson {
+  _id: string;
+  name: string;
+}
+
+interface Module {
+  _id: string;
+  name: string;
+  course: string;
+  lessons?: Lesson[];
+}
+
 export default function Modules() {
-  const { cid } = useParams();
-  const modules = db.modules;
+  const { cid } = useParams<{ cid: string }>();
+  const modules = db.modules as Module[];
+
   return (
     <div>
       <ModulesControls />
-      <br /><br /><br /><br />
+      <br />
+      <br />
+      <br />
+      <br />
 
       <ListGroup id="wd-modules" className="rounded-0">
         {modules
-          .filter((module: any) => module.course === cid)
-          .map((module: any) => (
+          .filter((module: Module) => module.course === cid)
+          .map((module: Module) => (
             <ListGroupItem
               key={module._id}
               className="wd-module p-0 mb-5 fs-5 border-gray"
@@ -30,7 +47,7 @@ export default function Modules() {
 
               {module.lessons && (
                 <ListGroup className="wd-lessons rounded-0">
-                  {module.lessons.map((lesson: any) => (
+                  {module.lessons.map((lesson: Lesson) => (
                     <ListGroupItem
                       key={lesson._id}
                       className="wd-lesson p-3 ps-1"

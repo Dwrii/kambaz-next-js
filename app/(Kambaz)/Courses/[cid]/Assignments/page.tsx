@@ -8,9 +8,16 @@ import AssignmentItem from "./AssignmentItem";
 import { useParams } from "next/navigation";
 import * as db from "../../../Database";
 
+interface Assignment {
+  _id: string;
+  course: string;
+  title: string;
+  details?: string;
+}
+
 export default function Assignments() {
-  const { cid } = useParams();
-  const assignments = db.assignments;
+  const { cid } = useParams<{ cid: string }>();
+  const assignments = db.assignments as Assignment[];
 
   return (
     <div id="wd-assignments" className="p-3">
@@ -44,13 +51,13 @@ export default function Assignments() {
 
       <div className="fs-6">
         {assignments
-          .filter((assignment: any) => assignment.course === cid)
-          .map((assignment: any) => (
+          .filter((assignment: Assignment) => assignment.course === cid)
+          .map((assignment: Assignment) => (
             <AssignmentItem
               key={assignment._id}
               title={assignment.title}
               href={`/Courses/${cid}/Assignments/${assignment._id}`}
-              details={assignment.details}
+              details={assignment.details ?? ""}
             />
           ))}
       </div>

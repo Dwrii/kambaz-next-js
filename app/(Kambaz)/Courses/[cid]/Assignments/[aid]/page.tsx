@@ -15,10 +15,27 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
 
+interface Assignment {
+  _id: string;
+  course: string;
+  title: string;
+  description: string;
+  points: number;
+  group: string;
+  displayGradeAs: string;
+  submissionType: string;
+  onlineEntryOptions?: string[];
+  assignTo?: string;
+  due?: string;
+  availableFrom?: string;
+  availableUntil?: string;
+}
+
 export default function AssignmentEditor() {
-  const { cid, aid } = useParams(); 
-  const assignment = db.assignments.find(
-    (a: any) => a.course === cid && a._id === aid
+  const { cid, aid } = useParams<{ cid: string; aid: string }>();
+
+  const assignment: Assignment | undefined = (db.assignments as Assignment[]).find(
+    (a) => a.course === cid && a._id === aid
   );
 
   if (!assignment) {
@@ -88,7 +105,13 @@ export default function AssignmentEditor() {
             <FormGroup>
               <FormLabel>Online Entry Options</FormLabel>
               <div>
-                {["Text Entry", "Website URL", "Media Recordings", "Student Annotation", "File Uploads"].map((opt) => (
+                {[
+                  "Text Entry",
+                  "Website URL",
+                  "Media Recordings",
+                  "Student Annotation",
+                  "File Uploads",
+                ].map((opt) => (
                   <FormCheck
                     key={opt}
                     type="checkbox"

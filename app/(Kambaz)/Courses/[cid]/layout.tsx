@@ -3,14 +3,20 @@ import { courses } from "../../Database";
 import CourseNavigation from "./Navigation";
 import Breadcrumb from "./Breadcrumb";
 
-export default async function CoursesLayout({ children, params }: any) {
+interface CoursesLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ cid: string }>;
+}
+
+export default async function CoursesLayout({ children, params }: CoursesLayoutProps) {
   const { cid } = await params;
-  const course = courses.find((course) => course._id === cid);
+  const course = courses.find((c) => c._id === cid);
+
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        <Breadcrumb course={course} /> 
+        <Breadcrumb course={course} />
       </h2>
       <hr />
       <div className="d-flex">
