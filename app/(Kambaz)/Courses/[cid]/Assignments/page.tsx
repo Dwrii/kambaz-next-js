@@ -5,8 +5,13 @@ import FormControl from "react-bootstrap/FormControl";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { BsGripVertical } from "react-icons/bs";
 import AssignmentItem from "./AssignmentItem";
+import { useParams } from "next/navigation";
+import * as db from "../../../Database";
 
 export default function Assignments() {
+  const { cid } = useParams();
+  const assignments = db.assignments;
+
   return (
     <div id="wd-assignments" className="p-3">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -38,30 +43,16 @@ export default function Assignments() {
       </div>
 
       <div className="fs-6">
-        <AssignmentItem
-          title="A1 - ENV + HTML"
-          href="/Courses/1234/Assignments/a1"
-          details='
-            <span class="text-danger">Multiple Modules</span> | 
-            <b>Not available until</b> May 6 at 12:00am | 
-            <b>Due</b> May 13 at 11:59pm | 100 pts'
-        />
-        <AssignmentItem
-          title="A2 - CSS + Bootstrap"
-          href="/Courses/1234/Assignments/a2"
-          details='
-            <span class="text-danger">Multiple Modules</span> | 
-            <b>Not available until</b> May 13 at 12:00am | 
-            <b>Due</b> May 20 at 11:59pm | 100 pts'
-        />
-        <AssignmentItem
-          title="A3 - JavaScript + React"
-          href="/Courses/1234/Assignments/a3"
-          details='
-            <span class="text-danger">Multiple Modules</span> | 
-            <b>Not available until</b> May 20 at 12:00am | 
-            <b>Due</b> May 27 at 11:59pm | 100 pts'
-        />
+        {assignments
+          .filter((assignment: any) => assignment.course === cid)
+          .map((assignment: any) => (
+            <AssignmentItem
+              key={assignment._id}
+              title={assignment.title}
+              href={`/Courses/${cid}/Assignments/${assignment._id}`}
+              details={assignment.details}
+            />
+          ))}
       </div>
     </div>
   );

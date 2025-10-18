@@ -1,7 +1,5 @@
-export default function People() {
-    return (
-      <div id="wd-people">
-        <h1>People</h1>
-      </div>
-  );}
-  
+import { redirect } from "next/navigation";
+
+export default function PeopleRedirect({ params }: any) {
+  redirect(`/Courses/${params.cid}/People/Table`);
+}
