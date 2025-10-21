@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BsGripVertical } from "react-icons/bs";
-import { FaRegFileAlt } from "react-icons/fa"; // 文档icon
+import { FaRegFileAlt } from "react-icons/fa";
 import AssignmentControlButtons from "./AssignmentControlButtons";
 
 interface AssignmentItemProps {

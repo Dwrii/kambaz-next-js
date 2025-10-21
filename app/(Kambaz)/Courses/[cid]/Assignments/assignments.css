@@ -1,0 +1,27 @@
+.wd-assn-header {
+    height: 80px;
+    background-color: #efefef;
+  }
+
+  .wd-weight-pill {
+    border: 1px solid #d3d3d3;
+    padding: 4px 10px;
+    font-weight: 400;
+    color: #5f6368;
+    background: transparent;
+    font-size: 0.9rem;
+    border-radius: 9999px; 
+  }
+
+  .wd-left-accent {
+    border-left: 6px solid #198754;
+  }
+
+  .group-btn {
+    background-color: #efefef !important;
+    color: black !important;
+  }
+
+  .group-btn:hover {
+    background-color: #bec0c1 !important;
+  }
