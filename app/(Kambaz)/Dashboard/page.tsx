@@ -12,11 +12,9 @@ import Button from "react-bootstrap/Button";
 import { FormControl } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
-import * as db from "../Database";
 import {
   enrollCourse,
   unenrollCourse,
-  setUserEnrollments,
 } from "../Courses/Enrollments/reducer";
 
 export interface Course {
@@ -49,7 +47,7 @@ interface RootState {
   enrollmentsReducer: { userEnrollments: Enrollment[] };
 }
 
-export default function Dashboard() {
+function DashboardBody() {
   const dispatch = useDispatch();
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
@@ -90,28 +88,6 @@ export default function Dashboard() {
           (e: Enrollment) => e.user === currentUser?._id && e.course === c._id
         )
       );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!currentUser?._id) return;
-    const key = `enrollments:${currentUser._id}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      try {
-        const parsed: Enrollment[] = JSON.parse(saved);
-        dispatch(setUserEnrollments(parsed));
-      } catch {
-      }
-    }
-  }, [currentUser?._id, dispatch]);
-
-  useEffect(() => {
-    if (!currentUser?._id) return;
-    const mine = allEnrollments.filter(
-      (e: Enrollment) => e.user === currentUser._id
-    );
-    localStorage.setItem(`enrollments:${currentUser._id}`, JSON.stringify(mine));
-  }, [allEnrollments, currentUser?._id]);
 
   if (!currentUser?._id) {
     return <div className="p-5 text-danger">Please sign in first.</div>;
@@ -255,4 +231,11 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+export default function Dashboard() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  if (!hydrated) return null;
+  return <DashboardBody />;
 }

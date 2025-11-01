@@ -1,130 +1,211 @@
 "use client";
 
-import { Modal, FormControl, Button, Form } from "react-bootstrap";
-import React from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import type { Assignment as BaseAssignment } from "./AssignmentChange";
+import {
+  ListGroup,
+  ListGroupItem,
+  Button,
+  Form,
+  InputGroup,
+  Modal,
+} from "react-bootstrap";
+import { BsGripVertical } from "react-icons/bs";
+import { FaSearch, FaCaretDown } from "react-icons/fa";
+import { LiaBookSolid } from "react-icons/lia";
+import AssignmentControlButtons from "../Assignments/AssignmentControlButtons";
+import "./assignments.css";
+import AssignmentChange from "./AssignmentChange";
+import { addAssignment, deleteAssignment } from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 
-export interface Assignment {
+// ✅ 新的联合类型：继承 BaseAssignment 并加 _id, course, dueDate
+type AssignmentFull = BaseAssignment & {
   _id: string;
   course: string;
-  title: string;
-  description: string;
-  points: number;
-  group?: string;
-  displayGradeAs?: string;
-  submissionType?: string;
-  onlineEntryOptions?: string[];
-  assignTo?: string;
-  due?: string;
-  availableFrom?: string;
-  availableUntil?: string;
-}
+  dueDate?: string;
+};
 
-interface Props {
-  show: boolean;
-  handleClose: () => void;
-  dialogTitle: string;
-  assignment: Assignment;
-  setAssignment: React.Dispatch<React.SetStateAction<Assignment>>;
-  addAssignment: () => void;
-}
+export default function Assignments() {
+  const { cid } = useParams<{ cid: string }>();
+  const dispatch = useDispatch();
+  const { assignments } = useSelector(
+    (state: { assignmentsReducer: { assignments: AssignmentFull[] } }) =>
+      state.assignmentsReducer
+  );
 
-export default function AssignmentChange({
-  show,
-  handleClose,
-  dialogTitle,
-  assignment,
-  setAssignment,
-  addAssignment,
-}: Props) {
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const router = useRouter();
+
+  const [assignment, setAssignment] = useState<AssignmentFull>({
+    _id: "",
+    course: cid,
+    title: "",
+    description: "",
+    points: 100,
+    due: "",
+    availableFrom: "",
+    availableUntil: "",
+  });
+
+  const [showDelete, setShowDelete] = useState(false);
+  const [toDelete, setToDelete] = useState<AssignmentFull | null>(null);
+
+  const addNewAssignment = () => {
+    dispatch(addAssignment({ ...assignment, course: cid }));
+    setAssignment({
+      _id: "",
+      course: cid,
+      title: "",
+      description: "",
+      points: 100,
+      due: "",
+      availableFrom: "",
+      availableUntil: "",
+    });
+  };
+
+  // ✅ 下面逻辑保持完全不变
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>{dialogTitle}</Modal.Title>
-      </Modal.Header>
+    <div id="wd-assignments" className="p-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div style={{ maxWidth: 340 }} className="w-100">
+          <InputGroup>
+            <InputGroup.Text className="bg-white border-end-0">
+              <FaSearch className="text-secondary" />
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              id="wd-search-assignments"
+              className="border-start-0"
+            />
+          </InputGroup>
+        </div>
+        <div className="ms-3 flex-shrink-0">
+          <Button
+            variant="secondary"
+            className="me-2 group-btn"
+            id="wd-add-group"
+          >
+            + Group
+          </Button>
+          <Button
+            variant="danger"
+            id="wd-add-assignment"
+            onClick={() => router.push(`/Courses/${cid}/Assignments/new`)}
+          >
+            + Assignment
+          </Button>
+        </div>
+      </div>
 
-      <Modal.Body>
-        <Form.Group className="mb-3">
-          <Form.Label>Title</Form.Label>
-          <FormControl
-            value={assignment.title}
-            onChange={(e) =>
-              setAssignment({ ...assignment, title: e.target.value })
-            }
-            placeholder="Enter assignment title"
-          />
-        </Form.Group>
+      <AssignmentChange
+        show={show}
+        handleClose={handleClose}
+        dialogTitle="Add Assignment"
+        assignment={assignment}
+        setAssignment={setAssignment}
+        addAssignment={addNewAssignment}
+      />
 
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <FormControl
-            value={assignment.description}
-            onChange={(e) =>
-              setAssignment({ ...assignment, description: e.target.value })
-            }
-            placeholder="Enter description"
-          />
-        </Form.Group>
+      <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Assignment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete <b>{toDelete?.title}</b>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDelete(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              if (toDelete?._id) {
+                dispatch(deleteAssignment(toDelete._id));
+              }
+              setShowDelete(false);
+            }}
+          >
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Points</Form.Label>
-          <FormControl
-            type="number"
-            value={assignment.points}
-            onChange={(e) =>
-              setAssignment({ ...assignment, points: Number(e.target.value) })
-            }
-            placeholder="e.g. 100"
-          />
-        </Form.Group>
+      <ListGroup className="rounded-0 shadow-sm">
+        <ListGroupItem className="wd-module p-0 mb-4 fs-5 border-gray">
+          <div className="wd-title wd-assn-header px-3 py-3 d-flex justify-content-between align-items-center border-bottom">
+            <span className="d-flex align-items-center">
+              <BsGripVertical className="me-2 fs-5 text-muted" />
+              <FaCaretDown className="me-2" />
+              <span className="fw-semibold text-uppercase">Assignments</span>
+            </span>
+          </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Due Date</Form.Label>
-          <FormControl
-            type="date"
-            value={assignment.due ?? ""}
-            onChange={(e) =>
-              setAssignment({ ...assignment, due: e.target.value })
-            }
-          />
-        </Form.Group>
+          <ListGroup className="wd-lessons rounded-0">
+            {assignments
+              .filter((a) => a.course === cid)
+              .map((a) => (
+                <ListGroupItem
+                  key={a._id}
+                  className="wd-lesson wd-left-accent py-3 ps-0 pe-3 d-flex align-items-start justify-content-between border-0 border-bottom"
+                >
+                  <div className="d-flex align-items-start w-100">
+                    <div className="px-3 pt-1">
+                      <BsGripVertical className="me-2 fs-5 text-muted" />
+                      <LiaBookSolid className="me-2 fs-4 text-success" />
+                    </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Available From</Form.Label>
-          <FormControl
-            type="date"
-            value={assignment.availableFrom ?? ""}
-            onChange={(e) =>
-              setAssignment({ ...assignment, availableFrom: e.target.value })
-            }
-          />
-        </Form.Group>
+                    <div className="flex-grow-1">
+                      <Link
+                        href={`/Courses/${cid}/Assignments/${a._id}`}
+                        className="fw-semibold text-dark text-decoration-none fs-5"
+                      >
+                        {a.title?.trim() || "(Untitled)"}
+                      </Link>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Available Until</Form.Label>
-          <FormControl
-            type="date"
-            value={assignment.availableUntil ?? ""}
-            onChange={(e) =>
-              setAssignment({ ...assignment, availableUntil: e.target.value })
-            }
-          />
-        </Form.Group>
-      </Modal.Body>
+                      {a.description && (
+                        <div className="text-muted small mt-1">
+                          {a.description}
+                        </div>
+                      )}
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          onClick={() => {
-            addAssignment();
-            handleClose();
-          }}
-        >
-          Save
-        </Button>
-      </Modal.Footer>
-    </Modal>
+                      <div className="text-muted small mt-1">
+                        {a.availableFrom && (
+                          <>
+                            <b>Available From:</b> {a.availableFrom}{" "}
+                            <span className="mx-1 text-muted">|</span>
+                          </>
+                        )}
+                        {a.availableUntil && (
+                          <>
+                            <b>Until:</b> {a.availableUntil}{" "}
+                            <span className="mx-1 text-muted">|</span>
+                          </>
+                        )}
+                        <b>Due:</b> {a.due || a.dueDate || "—"}{" "}
+                        <span className="mx-1 text-muted">|</span>
+                        {a.points} pts
+                      </div>
+                    </div>
+                  </div>
+                  <AssignmentControlButtons
+                    assignmentId={a._id}
+                    deleteAssignment={() => {
+                      setToDelete(a);
+                      setShowDelete(true);
+                    }}
+                  />
+                </ListGroupItem>
+              ))}
+          </ListGroup>
+        </ListGroupItem>
+      </ListGroup>
+    </div>
   );
 }

@@ -33,18 +33,27 @@ export default function KambazNavigation() {
         action
         className="bg-black border-0 text-center"
       >
-        <Image src="/images/NEU.png" alt="Northeastern University logo" width={75} height={75} />
+        <Image
+          src="/images/NEU.png"
+          alt="Northeastern University logo"
+          width={75}
+          height={75}
+        />
       </ListGroupItem>
 
       <ListGroupItem
         as={Link}
         href="/Account"
         className={`text-center border-0 bg-black ${
-          pathname.includes("Account") ? "bg-white text-danger" : "bg-black text-white"
+          pathname.includes("Account")
+            ? "bg-white text-danger"
+            : "bg-black text-white"
         }`}
       >
         <FaRegCircleUser
-          className={`fs-1 ${pathname.includes("Account") ? "text-danger" : "text-white"}`}
+          className={`fs-1 ${
+            pathname.includes("Account") ? "text-danger" : "text-white"
+          }`}
         />
         <br />
         Account
@@ -52,11 +61,13 @@ export default function KambazNavigation() {
 
       {links.map(({ label, path, icon: Icon }) => (
         <ListGroupItem
-          key={path}
+          key={`${path}-${label}`} 
           as={Link}
           href={path}
           className={`bg-black text-center border-0 ${
-            pathname.includes(label) ? "text-danger bg-white" : "text-white bg-black"
+            pathname.includes(label)
+              ? "text-danger bg-white"
+              : "text-white bg-black"
           }`}
         >
           <Icon className="fs-1 text-danger" />

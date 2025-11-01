@@ -1,32 +1,33 @@
 "use client";
 import { Modal, FormControl, Button, Form } from "react-bootstrap";
+import React from "react";
 
 export interface Assignment {
   title: string;
   description: string;
   points: number;
-  due: string;
-  availableFrom: string;
-  availableUntil: string;
+  due?: string;
+  availableFrom?: string;
+  availableUntil?: string;
 }
 
-interface Props {
+export interface AssignmentChangeProps<T extends Assignment = Assignment> {
   show: boolean;
   handleClose: () => void;
   dialogTitle: string;
-  assignment: Assignment;
-  setAssignment: React.Dispatch<React.SetStateAction<Assignment>>;
+  assignment: T;
+  setAssignment: React.Dispatch<React.SetStateAction<T>>;
   addAssignment: () => void;
 }
 
-export default function AssignmentChange({
+export default function AssignmentChange<T extends Assignment>({
   show,
   handleClose,
   dialogTitle,
   assignment,
   setAssignment,
   addAssignment,
-}: Props) {
+}: AssignmentChangeProps<T>) {
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -43,6 +44,7 @@ export default function AssignmentChange({
             placeholder="Enter assignment title"
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>Description</Form.Label>
           <FormControl
@@ -53,6 +55,7 @@ export default function AssignmentChange({
             placeholder="Enter description"
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>Points</Form.Label>
           <FormControl
@@ -61,43 +64,47 @@ export default function AssignmentChange({
             onChange={(e) =>
               setAssignment({
                 ...assignment,
-                points: parseInt(e.target.value) || 0,
+                points: Number(e.target.value),
               })
             }
             placeholder="e.g. 100"
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>Due Date</Form.Label>
           <FormControl
             type="date"
-            value={assignment.due}
+            value={assignment.due || ""}
             onChange={(e) =>
               setAssignment({ ...assignment, due: e.target.value })
             }
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>Available From</Form.Label>
           <FormControl
             type="date"
-            value={assignment.availableFrom}
+            value={assignment.availableFrom || ""}
             onChange={(e) =>
               setAssignment({ ...assignment, availableFrom: e.target.value })
             }
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>Available Until</Form.Label>
           <FormControl
             type="date"
-            value={assignment.availableUntil}
+            value={assignment.availableUntil || ""}
             onChange={(e) =>
               setAssignment({ ...assignment, availableUntil: e.target.value })
             }
           />
         </Form.Group>
       </Modal.Body>
+
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
           Cancel
