@@ -5,19 +5,39 @@ import Breadcrumb from "./Breadcrumb";
 import { useSelector } from "react-redux";
 import { useParams, redirect } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
+import { Course } from "../reducer";
 
-export default function CoursesLayout({ children }: { children: ReactNode }) {
+interface Enrollment {
+  user: string;
+  course: string;
+}
+
+interface RootState {
+  coursesReducer: { courses: Course[] };
+  accountReducer: { currentUser: { _id: string } | null };
+  enrollmentsReducer: { userEnrollments: Enrollment[] };
+}
+
+export default function CoursesLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { cid } = useParams<{ cid: string }>();
-  const { courses } = useSelector((state: any) => state.coursesReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { userEnrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
+  const { currentUser } = useSelector(
+    (state: RootState) => state.accountReducer
+  );
+  const { userEnrollments } = useSelector(
+    (state: RootState) => state.enrollmentsReducer
+  );
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const course = courses.find((course: any) => course._id === cid);
+  const course = courses.find((c) => c._id === cid);
 
   useEffect(() => {
     const isEnrolled = userEnrollments.some(
-      (e: any) => e.user === currentUser?._id && e.course === cid
+      (e) => e.user === currentUser?._id && e.course === cid
     );
     if (!isEnrolled) {
       redirect("/Dashboard");

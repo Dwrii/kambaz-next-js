@@ -1,19 +1,18 @@
 "use client";
 import { useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, ListGroup, ListGroupItem } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { ListGroupItem, ListGroup } from "react-bootstrap";
 
 export default function ArrayStateVariable() {
-  const { todos } = useSelector((state: any) => state.todosReducer);
-  const [array, setArray] = useState([1, 2, 3, 4, 5]);
+  const { todos } = useSelector((state: { todosReducer: { todos: { id: string; title: string }[] } }) => state.todosReducer);
+  const [array, setArray] = useState<number[]>([1, 2, 3, 4, 5]);
 
   const addElement = () => {
     setArray([...array, Math.floor(Math.random() * 100)]);
   };
 
   const deleteElement = (index: number) => {
-    setArray(array.filter((item, i) => i !== index));
+    setArray(array.filter((_, i) => i !== index));
   };
 
   return (
@@ -49,15 +48,10 @@ export default function ArrayStateVariable() {
       </ul>
 
       <ListGroup>
-        {todos.map((todo: any) => (
-        <ListGroupItem key={todo.id}>
-        {todo.title}
-    </ListGroupItem>
-  ))}
-</ListGroup>
-<hr />
-
-
+        {todos.map((todo) => (
+          <ListGroupItem key={todo.id}>{todo.title}</ListGroupItem>
+        ))}
+      </ListGroup>
       <hr />
     </div>
   );

@@ -21,7 +21,7 @@ export default function AssignmentItem({
 }: AssignmentItemProps) {
 
   const [showDelete, setShowDelete] = useState(false);
-  const [toDelete, setToDelete] = useState<any>(null);
+  const [toDelete, setToDelete] = useState<{ _id: string; title: string } | null>(null);
 
   return (
     <div className="d-flex align-items-start border-bottom py-2 small">

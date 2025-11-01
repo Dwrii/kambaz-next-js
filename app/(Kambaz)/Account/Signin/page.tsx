@@ -7,8 +7,14 @@ import { useState } from "react";
 import * as db from "../../Database";
 import { FormControl, Button } from "react-bootstrap";
 
+interface User {
+  username: string;
+  password: string;
+  [key: string]: unknown;
+}
+
 export default function Signin() {
-  const [credentials, setCredentials] = useState<any>({
+  const [credentials, setCredentials] = useState<User>({
     username: "wurui2",
     password: "123",
   });
@@ -16,11 +22,12 @@ export default function Signin() {
   const router = useRouter();
 
   const signin = () => {
-    const user = db.users.find(
-      (u: any) =>
-        u.username === credentials.username &&
-        u.password === credentials.password
-    );
+const user = (db.users as unknown as User[]).find(
+  (u) =>
+    u.username === credentials.username &&
+    u.password === credentials.password
+);
+
     if (!user) return;
     dispatch(setCurrentUser(user));
     router.push("/Dashboard");

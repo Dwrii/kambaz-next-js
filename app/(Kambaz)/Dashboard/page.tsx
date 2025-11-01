@@ -19,14 +19,45 @@ import {
   setUserEnrollments,
 } from "../Courses/Enrollments/reducer";
 
+export interface Course {
+  _id: string;
+  name: string;
+  number: string;
+  startDate?: string;
+  endDate?: string;
+  image?: string;
+  description?: string;
+}
+
+export interface Enrollment {
+  user: string;
+  course: string;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+}
+
+interface RootState {
+  coursesReducer: { courses: Course[] };
+  accountReducer: { currentUser: User | null };
+  enrollmentsReducer: { userEnrollments: Enrollment[] };
+}
+
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const { courses } = useSelector((state: any) => state.coursesReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const allEnrollments = useSelector(
-    (state: any) => state.enrollmentsReducer.userEnrollments
+    (state: RootState) => state.enrollmentsReducer.userEnrollments
   );
-  const [course, setCourse] = useState<any>({
+
+  const [course, setCourse] = useState<Course>({
     _id: "0",
     name: "New Course",
     number: "New Number",
@@ -35,11 +66,12 @@ export default function Dashboard() {
     image: "/images/newCourse.png",
     description: "New Description",
   });
+
   const [showAll, setShowAll] = useState(false);
 
-  const isEnrolled = (courseId: string) =>
+  const isEnrolled = (courseId: string): boolean =>
     allEnrollments.some(
-      (e: any) => e.user === currentUser?._id && e.course === courseId
+      (e: Enrollment) => e.user === currentUser?._id && e.course === courseId
     );
 
   const toggleEnrollment = (courseId: string) => {
@@ -53,9 +85,9 @@ export default function Dashboard() {
 
   const visibleCourses = showAll
     ? courses
-    : courses.filter((c: any) =>
+    : courses.filter((c: Course) =>
         allEnrollments.some(
-          (e: any) => e.user === currentUser?._id && e.course === c._id
+          (e: Enrollment) => e.user === currentUser?._id && e.course === c._id
         )
       );
 
@@ -66,26 +98,23 @@ export default function Dashboard() {
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed: Enrollment[] = JSON.parse(saved);
         dispatch(setUserEnrollments(parsed));
-      } catch (err) {}
+      } catch {
+      }
     }
   }, [currentUser?._id, dispatch]);
 
   useEffect(() => {
     if (!currentUser?._id) return;
     const mine = allEnrollments.filter(
-      (e: any) => e.user === currentUser._id
+      (e: Enrollment) => e.user === currentUser._id
     );
     localStorage.setItem(`enrollments:${currentUser._id}`, JSON.stringify(mine));
   }, [allEnrollments, currentUser?._id]);
 
   if (!currentUser?._id) {
-    return (
-      <div className="p-5 text-danger">
-        Please sign in first.
-      </div>
-    );
+    return <div className="p-5 text-danger">Please sign in first.</div>;
   }
 
   return (
@@ -133,7 +162,7 @@ export default function Dashboard() {
       </div>
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {visibleCourses.map((course: any) => (
+          {visibleCourses.map((course) => (
             <Col
               key={course._id}
               className="wd-dashboard-course"

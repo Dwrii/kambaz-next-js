@@ -4,8 +4,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { addTodo, updateTodo, setTodo } from "./todosReducer";
 import { ListGroupItem, Button, FormControl } from "react-bootstrap";
 
+interface Todo {
+  id: string;
+  title: string;
+}
+
+interface RootState {
+  todosReducer: { todo: Todo };
+}
+
 export default function TodoForm() {
-  const { todo } = useSelector((state: any) => state.todosReducer);
+  const { todo } = useSelector((state: RootState) => state.todosReducer);
   const dispatch = useDispatch();
 
   return (
@@ -13,7 +22,7 @@ export default function TodoForm() {
       <div className="d-flex gap-2 align-items-center">
         <FormControl
           defaultValue={todo.title}
-          onChange={(e) =>
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             dispatch(setTodo({ ...todo, title: e.target.value }))
           }
         />

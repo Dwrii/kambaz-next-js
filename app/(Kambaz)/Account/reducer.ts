@@ -13,7 +13,7 @@ const accountSlice = createSlice({
   name: "accountReducer",
   initialState,
   reducers: {
-    setCurrentUser: (state, action: PayloadAction<any>) => {
+    setCurrentUser: (state, action: PayloadAction<unknown>) => {
       state.currentUser = action.payload;
       if (typeof window !== "undefined") {
         localStorage.setItem("currentUser", JSON.stringify(action.payload));
