@@ -1,8 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import * as db from "../../../../Database";
+import { useSelector, useDispatch } from "react-redux";
+import { addAssignment, updateAssignment } from "../reducer";
+import { useState, useEffect } from "react";
 
 import Form from "react-bootstrap/Form";
 import FormGroup from "react-bootstrap/FormGroup";
@@ -14,6 +16,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
+import Button from "react-bootstrap/Button";
 
 interface Assignment {
   _id: string;
@@ -33,21 +36,73 @@ interface Assignment {
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams<{ cid: string; aid: string }>();
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-  const assignment: Assignment | undefined = (db.assignments as Assignment[]).find(
-    (a) => a.course === cid && a._id === aid
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const isNew = aid === "new";
+
+  const original = assignments.find(
+    (a: any) => a.course === cid && a._id === aid
   );
 
-  if (!assignment) {
-    return <div className="p-3 text-danger">Assignment not found.</div>;
-  }
+  const [assignment, setAssignment] = useState<Assignment>(
+    isNew
+      ? {
+          _id: "",
+          course: cid,
+          title: "",
+          description: "",
+          points: 100,
+          group: "ASSIGNMENTS",
+          displayGradeAs: "Points",
+          submissionType: "Online",
+          onlineEntryOptions: [],
+          assignTo: "",
+          due: "",
+          availableFrom: "",
+          availableUntil: "",
+        }
+      : { ...(original || {} as Assignment) }
+  );
+
+  useEffect(() => {
+    if (!isNew && !original) {
+      router.push(`/Courses/${cid}/Assignments`);
+    }
+  }, [isNew, original, cid, router]);
+
+  const handleCheckbox = (option: string) => {
+    const current = assignment.onlineEntryOptions || [];
+    setAssignment({
+      ...assignment,
+      onlineEntryOptions: current.includes(option)
+        ? current.filter((o) => o !== option)
+        : [...current, option],
+    });
+  };
+
+  const handleSave = () => {
+    if (isNew) {
+      dispatch(addAssignment({ ...assignment, course: cid }));
+    } else {
+      dispatch(updateAssignment(assignment));
+    }
+    router.push(`/Courses/${cid}/Assignments`);
+  };
 
   return (
     <div id="wd-assignments-editor" className="p-3">
       <Form>
         <FormGroup className="mb-3" controlId="wd-name">
           <FormLabel>Assignment Name</FormLabel>
-          <FormControl type="text" defaultValue={assignment.title} />
+          <FormControl
+            type="text"
+            value={assignment.title}
+            onChange={(e) =>
+              setAssignment({ ...assignment, title: e.target.value })
+            }
+          />
         </FormGroup>
 
         <FormGroup className="mb-3" controlId="wd-description">
@@ -55,21 +110,42 @@ export default function AssignmentEditor() {
           <FormControl
             as="textarea"
             rows={6}
-            defaultValue={assignment.description}
+            value={assignment.description}
+            onChange={(e) =>
+              setAssignment({ ...assignment, description: e.target.value })
+            }
           />
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-points">
-          <FormLabel column sm={2}>Points</FormLabel>
+          <FormLabel column sm={2}>
+            Points
+          </FormLabel>
           <Col sm={4}>
-            <FormControl type="number" defaultValue={assignment.points} />
+            <FormControl
+              type="number"
+              value={assignment.points}
+              onChange={(e) =>
+                setAssignment({
+                  ...assignment,
+                  points: Number(e.target.value),
+                })
+              }
+            />
           </Col>
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-group">
-          <FormLabel column sm={2}>Assignment Group</FormLabel>
+          <FormLabel column sm={2}>
+            Assignment Group
+          </FormLabel>
           <Col sm={4}>
-            <FormSelect defaultValue={assignment.group}>
+            <FormSelect
+              value={assignment.group}
+              onChange={(e) =>
+                setAssignment({ ...assignment, group: e.target.value })
+              }
+            >
               <option value="ASSIGNMENTS">ASSIGNMENTS</option>
               <option value="QUIZZES">QUIZZES</option>
               <option value="EXAMS">EXAMS</option>
@@ -80,9 +156,19 @@ export default function AssignmentEditor() {
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-display-grade-as">
-          <FormLabel column sm={2}>Display Grade as</FormLabel>
+          <FormLabel column sm={2}>
+            Display Grade as
+          </FormLabel>
           <Col sm={4}>
-            <FormSelect defaultValue={assignment.displayGradeAs}>
+            <FormSelect
+              value={assignment.displayGradeAs}
+              onChange={(e) =>
+                setAssignment({
+                  ...assignment,
+                  displayGradeAs: e.target.value,
+                })
+              }
+            >
               <option value="Percentage">Percentage</option>
               <option value="Points">Points</option>
               <option value="Letter Grade">Letter Grade</option>
@@ -95,7 +181,15 @@ export default function AssignmentEditor() {
           <CardBody>
             <FormGroup className="mb-3" controlId="wd-submission-type">
               <FormLabel>Submission Type</FormLabel>
-              <FormSelect defaultValue={assignment.submissionType}>
+              <FormSelect
+                value={assignment.submissionType}
+                onChange={(e) =>
+                  setAssignment({
+                    ...assignment,
+                    submissionType: e.target.value,
+                  })
+                }
+              >
                 <option value="Online">Online</option>
                 <option value="On Paper">On Paper</option>
                 <option value="No submission">No submission</option>
@@ -116,7 +210,10 @@ export default function AssignmentEditor() {
                     key={opt}
                     type="checkbox"
                     label={opt}
-                    defaultChecked={assignment.onlineEntryOptions?.includes(opt)}
+                    checked={
+                      assignment.onlineEntryOptions?.includes(opt) || false
+                    }
+                    onChange={() => handleCheckbox(opt)}
                   />
                 ))}
               </div>
@@ -128,14 +225,26 @@ export default function AssignmentEditor() {
           <CardBody>
             <FormGroup className="mb-3">
               <FormLabel>Assign to</FormLabel>
-              <FormControl type="text" defaultValue={assignment.assignTo} />
+              <FormControl
+                type="text"
+                value={assignment.assignTo}
+                onChange={(e) =>
+                  setAssignment({ ...assignment, assignTo: e.target.value })
+                }
+              />
             </FormGroup>
 
             <Row className="mb-3">
               <Col sm={4}>
                 <FormGroup controlId="wd-due-date">
                   <FormLabel>Due</FormLabel>
-                  <FormControl type="date" defaultValue={assignment.due} />
+                  <FormControl
+                    type="date"
+                    value={assignment.due || ""}
+                    onChange={(e) =>
+                      setAssignment({ ...assignment, due: e.target.value })
+                    }
+                  />
                 </FormGroup>
               </Col>
             </Row>
@@ -144,13 +253,31 @@ export default function AssignmentEditor() {
               <Col sm={4}>
                 <FormGroup controlId="wd-available-from">
                   <FormLabel>Available from</FormLabel>
-                  <FormControl type="date" defaultValue={assignment.availableFrom} />
+                  <FormControl
+                    type="date"
+                    value={assignment.availableFrom || ""}
+                    onChange={(e) =>
+                      setAssignment({
+                        ...assignment,
+                        availableFrom: e.target.value,
+                      })
+                    }
+                  />
                 </FormGroup>
               </Col>
               <Col sm={4}>
                 <FormGroup controlId="wd-available-until">
                   <FormLabel>Until</FormLabel>
-                  <FormControl type="date" defaultValue={assignment.availableUntil} />
+                  <FormControl
+                    type="date"
+                    value={assignment.availableUntil || ""}
+                    onChange={(e) =>
+                      setAssignment({
+                        ...assignment,
+                        availableUntil: e.target.value,
+                      })
+                    }
+                  />
                 </FormGroup>
               </Col>
             </Row>
@@ -158,12 +285,15 @@ export default function AssignmentEditor() {
         </Card>
 
         <div className="mt-4">
-          <Link href={`/Courses/${cid}/Assignments`} className="btn btn-secondary me-2">
+          <Link
+            href={`/Courses/${cid}/Assignments`}
+            className="btn btn-secondary me-2"
+          >
             Cancel
           </Link>
-          <Link href={`/Courses/${cid}/Assignments`} className="btn btn-danger">
+          <Button variant="danger" onClick={handleSave}>
             Save
-          </Link>
+          </Button>
         </div>
       </Form>
     </div>

@@ -2,14 +2,27 @@ import Link from "next/link";
 import { BsGripVertical } from "react-icons/bs";
 import { FaRegFileAlt } from "react-icons/fa";
 import AssignmentControlButtons from "./AssignmentControlButtons";
+import { deleteAssignment } from "./reducer";
+import { Modal } from "react-bootstrap";
+import { useState } from "react";
 
 interface AssignmentItemProps {
   title: string;
   href: string;
   details: string;
+  _id: string;
 }
 
-export default function AssignmentItem({ title, href, details }: AssignmentItemProps) {
+export default function AssignmentItem({
+  title,
+  href,
+  details,
+  _id, 
+}: AssignmentItemProps) {
+
+  const [showDelete, setShowDelete] = useState(false);
+  const [toDelete, setToDelete] = useState<any>(null);
+
   return (
     <div className="d-flex align-items-start border-bottom py-2 small">
       <BsGripVertical className="me-2 fs-5 text-secondary mt-1" />
@@ -31,15 +44,21 @@ export default function AssignmentItem({ title, href, details }: AssignmentItemP
           ) : (
             <>
               <span className="text-danger">Multiple Modules</span> |{" "}
-              <b>Not available until</b> May 6 at 12:00am | <b>Due</b> May 13
-              at 11:59pm | 100 pts
+              <b>Not available until</b> May 6 at 12:00am | <b>Due</b> May 13 at
+              11:59pm | 100 pts
             </>
           )}
         </div>
       </div>
 
       <div className="ms-2">
-        <AssignmentControlButtons />
+        <AssignmentControlButtons
+          assignmentId={_id} 
+          deleteAssignment={(id) => {
+            setToDelete({ _id, title });
+            setShowDelete(true);
+          }}
+        />
       </div>
     </div>
   );

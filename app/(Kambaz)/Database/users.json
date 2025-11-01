@@ -188,6 +188,20 @@
       "role": "STUDENT",
       "lastActivity": "0000-00-00",
       "totalActivity": "00:00:00"
-    }
+    },
+  
+  {
+  "_id": "0022147",
+  "firstName": "Wu",
+  "lastName": "Rui2",
+  "username": "wurui2",   
+  "password": "123",     
+  "loginId": "DU015",
+  "section": "S108",
+  "role": "STUDENT",
+  "lastActivity": "2025-10-31",
+  "totalActivity": "00:00:00"
+  }
+
   ]
   
