@@ -1,5 +1,6 @@
+"use client";
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { modules } from "../../../Database";
 import { v4 as uuidv4 } from "uuid";
 
 interface Lesson {
@@ -20,19 +21,23 @@ interface ModulesState {
 }
 
 const initialState: ModulesState = {
-  modules: modules as Module[],
+  modules: [],
 };
 
 const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    addModule: (state, { payload }: PayloadAction<Omit<Module, "_id" | "lessons">>) => {
+    setModules: (state, { payload }: PayloadAction<Module[]>) => {
+      state.modules = payload;
+    },
+
+    addModule: (state, { payload }) => {
       const newModule: Module = {
         _id: uuidv4(),
-        lessons: [],
         name: payload.name,
         course: payload.course,
+        lessons: [],
       };
       state.modules.push(newModule);
     },
@@ -41,7 +46,7 @@ const modulesSlice = createSlice({
       state.modules = state.modules.filter((m) => m._id !== payload);
     },
 
-    updateModule: (state, { payload }: PayloadAction<Module>) => {
+    updateModule: (state, { payload }) => {
       state.modules = state.modules.map((m) =>
         m._id === payload._id ? { ...m, ...payload } : m
       );
@@ -55,7 +60,7 @@ const modulesSlice = createSlice({
   },
 });
 
-export const { addModule, deleteModule, updateModule, editModule } =
+export const { addModule, deleteModule, updateModule, editModule, setModules } =
   modulesSlice.actions;
 
 export default modulesSlice.reducer;

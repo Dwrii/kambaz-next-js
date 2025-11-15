@@ -17,6 +17,7 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
 import Button from "react-bootstrap/Button";
+import * as client from "../client";
 
 interface Assignment {
   _id: string;
@@ -39,7 +40,6 @@ export default function AssignmentEditor() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // ✅ 指定 Redux state 类型
   const { assignments } = useSelector(
     (state: { assignmentsReducer: { assignments: Assignment[] } }) =>
       state.assignmentsReducer
@@ -47,7 +47,6 @@ export default function AssignmentEditor() {
 
   const isNew = aid === "new";
 
-  // ✅ 指定 find() 内类型
   const original = assignments.find(
     (a: Assignment) => a.course === cid && a._id === aid
   );
@@ -88,11 +87,13 @@ export default function AssignmentEditor() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isNew) {
-      dispatch(addAssignment({ ...assignment, course: cid }));
+      const created = await client.createAssignmentForCourse(cid, assignment);
+      dispatch(addAssignment(created));
     } else {
-      dispatch(updateAssignment(assignment));
+      const updated = await client.updateAssignment(assignment);
+      dispatch(updateAssignment(updated));
     }
     router.push(`/Courses/${cid}/Assignments`);
   };
