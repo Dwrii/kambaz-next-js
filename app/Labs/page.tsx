@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function Labs() {
-  redirect("/Labs/Lab4");
+  redirect("/Labs/Lab5");
 }
