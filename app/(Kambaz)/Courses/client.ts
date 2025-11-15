@@ -5,7 +5,26 @@ const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 const USERS_API = `${HTTP_SERVER}/api/users`;
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 
-export const createModuleForCourse = async (courseId: string, module: any) => {
+export interface Module {
+  _id?: string;
+  name?: string;
+  description?: string;
+  course?: string;
+  order?: number;
+}
+
+export interface Course {
+  _id?: string;
+  name?: string;
+  number?: string;
+  description?: string;
+  image?: string;
+}
+
+export const createModuleForCourse = async (
+  courseId: string,
+  module: Module
+) => {
   const response = await axios.post(
     `${COURSES_API}/${courseId}/modules`,
     module
@@ -30,7 +49,7 @@ export const findMyCourses = async () => {
   return data;
 };
 
-export const createCourse = async (course: any) => {
+export const createCourse = async (course: Course) => {
   const { data } = await axiosWithCredentials.post(
     `${USERS_API}/current/courses`,
     course
@@ -43,7 +62,7 @@ export const deleteCourse = async (id: string) => {
   return data;
 };
 
-export const updateCourse = async (course: any) => {
+export const updateCourse = async (course: Course) => {
   const { data } = await axios.put(`${COURSES_API}/${course._id}`, course);
   return data;
 };
@@ -55,7 +74,7 @@ export const deleteModule = async (moduleId: string) => {
   return response.data;
 };
 
-export const updateModule = async (module: any) => {
+export const updateModule = async (module: Module) => {
   const { data } = await axios.put(`${MODULES_API}/${module._id}`, module);
   return data;
 };

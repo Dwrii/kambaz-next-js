@@ -10,12 +10,7 @@ import ModulesControls from "./ModulesControls";
 import ModuleControlButtons from "./ModulesControlButtons";
 import LessonControlButtons from "./LessonControlButtons";
 
-import {
-  setModules,
-  editModule,
-  updateModule,
-  deleteModule,
-} from "./reducer";
+import { setModules, editModule, updateModule, deleteModule } from "./reducer";
 
 import * as client from "../../client";
 
@@ -42,7 +37,6 @@ export default function Modules() {
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
 
-  // Load modules for this course
   const fetchModules = async () => {
     if (!cid) return;
     const data = await client.findModulesForCourse(cid);
@@ -53,7 +47,6 @@ export default function Modules() {
     fetchModules();
   }, [cid]);
 
-  // Create module for course
   const onCreateModuleForCourse = async () => {
     if (!cid || !moduleName.trim()) return;
     const newModule = { name: moduleName };
@@ -62,16 +55,14 @@ export default function Modules() {
     setModuleName("");
   };
 
-  // Update module (professor-style)
-  const onUpdateModule = async (module: any) => {
+  const onUpdateModule = async (module: Module) => {
     await client.updateModule(module);
-    const updatedModules = modules.map((m: any) =>
+    const updatedModules = modules.map((m: Module) =>
       m._id === module._id ? module : m
     );
     dispatch(setModules(updatedModules));
   };
 
-  // Remove module
   const onRemoveModule = async (moduleId: string) => {
     await client.deleteModule(moduleId);
     dispatch(deleteModule(moduleId));

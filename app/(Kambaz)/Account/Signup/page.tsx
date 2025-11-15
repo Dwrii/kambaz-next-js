@@ -7,8 +7,13 @@ import { useState } from "react";
 import { FormControl, Button } from "react-bootstrap";
 import * as client from "../client";
 
+interface NewUser {
+  username?: string;
+  password?: string;
+}
+
 export default function Signup() {
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<NewUser>({});
   const dispatch = useDispatch();
   const signup = async () => {
     const currentUser = await client.signup(user);

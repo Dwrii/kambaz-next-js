@@ -49,16 +49,16 @@ export default function Assignments() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
-  const [assignment, setAssignment] = useState<any>({
-    _id: "",
-    course: cid,
-    title: "",
-    description: "",
-    points: 100,
-    dueDate: "",
-    availableFrom: "",
-    availableUntil: "",
-  });
+const [assignment, setAssignment] = useState<Assignment>({
+  _id: "",
+  course: cid ?? "",
+  title: "",
+  description: "",
+  points: 100,
+  dueDate: "",
+  availableFrom: "",
+  availableUntil: "",
+});
 
   const [showDelete, setShowDelete] = useState(false);
   const [toDelete, setToDelete] = useState<Assignment | null>(null);
