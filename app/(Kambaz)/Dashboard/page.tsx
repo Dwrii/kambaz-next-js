@@ -55,6 +55,10 @@ function DashboardBody() {
     (state: RootState) => state.enrollmentsReducer.userEnrollments
   );
 
+  // NEW: faculty/admin permission check
+  const isFaculty =
+    currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN";
+
   const [course, setCourse] = useState<Course>({
     _id: "0",
     name: "New Course",
@@ -97,36 +101,45 @@ function DashboardBody() {
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1>
       <hr />
-      <h5>
-        New Course
-        <button
-          className="btn btn-primary float-end"
-          id="wd-add-new-course-click"
-          onClick={() => dispatch(addNewCourse(course))}
-        >
-          Add
-        </button>
-        <button
-          className="btn btn-warning float-end me-2"
-          onClick={() => dispatch(updateCourse(course))}
-          id="wd-update-course-click"
-        >
-          Update
-        </button>
-      </h5>
-      <br />
-      <FormControl
-        value={course.name}
-        className="mb-2"
-        onChange={(e) => setCourse({ ...course, name: e.target.value })}
-      />
-      <FormControl
-        as="textarea"
-        value={course.description}
-        rows={3}
-        onChange={(e) => setCourse({ ...course, description: e.target.value })}
-      />
-      <hr />
+
+      {/* NEW: hide add/update section for students */}
+      {isFaculty && (
+        <>
+          <h5>
+            New Course
+            <button
+              className="btn btn-primary float-end"
+              id="wd-add-new-course-click"
+              onClick={() => dispatch(addNewCourse(course))}
+            >
+              Add
+            </button>
+            <button
+              className="btn btn-warning float-end me-2"
+              onClick={() => dispatch(updateCourse(course))}
+              id="wd-update-course-click"
+            >
+              Update
+            </button>
+          </h5>
+          <br />
+          <FormControl
+            value={course.name}
+            className="mb-2"
+            onChange={(e) => setCourse({ ...course, name: e.target.value })}
+          />
+          <FormControl
+            as="textarea"
+            value={course.description}
+            rows={3}
+            onChange={(e) =>
+              setCourse({ ...course, description: e.target.value })
+            }
+          />
+          <hr />
+        </>
+      )}
+
       <div className="d-flex justify-content-end mb-3">
         <Button
           variant="primary"
@@ -136,6 +149,7 @@ function DashboardBody() {
           {showAll ? "Show My Courses" : "Show All Courses"}
         </Button>
       </div>
+
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
           {visibleCourses.map((course) => (
@@ -197,30 +211,36 @@ function DashboardBody() {
                     >
                       {course.description}
                     </CardText>
+
                     <div className="d-flex justify-content-between align-items-center mt-2">
                       <Button variant="primary">Go</Button>
-                      <div>
-                        <button
-                          onClick={(event) => {
-                            event.preventDefault();
-                            dispatch(deleteCourse(course._id));
-                          }}
-                          className="btn btn-danger ms-2"
-                          id="wd-delete-course-click"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          id="wd-edit-course-click"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            setCourse(course);
-                          }}
-                          className="btn btn-warning ms-2"
-                        >
-                          Edit
-                        </button>
-                      </div>
+
+                      {/* NEW: Delete/Edit buttons hidden for students */}
+                      {isFaculty && (
+                        <>
+                          <button
+                            onClick={(event) => {
+                              event.preventDefault();
+                              dispatch(deleteCourse(course._id));
+                            }}
+                            className="btn btn-danger ms-2"
+                            id="wd-delete-course-click"
+                          >
+                            Delete
+                          </button>
+
+                          <button
+                            id="wd-edit-course-click"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setCourse(course);
+                            }}
+                            className="btn btn-warning ms-2"
+                          >
+                            Edit
+                          </button>
+                        </>
+                      )}
                     </div>
                   </CardBody>
                 </Link>

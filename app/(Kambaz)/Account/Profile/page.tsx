@@ -1,5 +1,5 @@
 "use client";
-import { redirect } from "next/dist/client/components/navigation";
+import { redirect } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "../reducer";
@@ -8,6 +8,7 @@ import { Button, FormControl } from "react-bootstrap";
 export default function Profile() {
   const [profile, setProfile] = useState<Record<string, unknown>>({});
   const dispatch = useDispatch();
+
   const { currentUser } = useSelector(
     (state: { accountReducer: { currentUser: Record<string, unknown> | null } }) =>
       state.accountReducer
@@ -30,58 +31,69 @@ export default function Profile() {
   return (
     <div className="wd-profile-screen">
       <h3>Profile</h3>
+
       {profile && (
         <div>
           <FormControl
             id="wd-username"
             className="mb-2"
-            defaultValue={String(profile.username ?? "")}
+            value={String(profile.username ?? "")}
             onChange={(e) =>
               setProfile({ ...profile, username: e.target.value })
             }
           />
+
           <FormControl
             id="wd-password"
             className="mb-2"
-            defaultValue={String(profile.password ?? "")}
+            type="password"
+            value={String(profile.password ?? "")}
             onChange={(e) =>
               setProfile({ ...profile, password: e.target.value })
             }
           />
+
           <FormControl
             id="wd-firstname"
             className="mb-2"
-            defaultValue={String(profile.firstName ?? "")}
+            value={String(profile.firstName ?? "")}
             onChange={(e) =>
               setProfile({ ...profile, firstName: e.target.value })
             }
           />
+
           <FormControl
             id="wd-lastname"
             className="mb-2"
-            defaultValue={String(profile.lastName ?? "")}
+            value={String(profile.lastName ?? "")}
             onChange={(e) =>
               setProfile({ ...profile, lastName: e.target.value })
             }
           />
+
           <FormControl
             id="wd-dob"
             className="mb-2"
             type="date"
-            defaultValue={String(profile.dob ?? "")}
-            onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
+            value={String(profile.dob ?? "")}
+            onChange={(e) =>
+              setProfile({ ...profile, dob: e.target.value })
+            }
           />
+
           <FormControl
             id="wd-email"
             className="mb-2"
-            defaultValue={String(profile.email ?? "")}
+            value={String(profile.email ?? "")}
             onChange={(e) =>
               setProfile({ ...profile, email: e.target.value })
             }
           />
+
           <select
             className="form-control mb-2"
             id="wd-role"
+            value={String(profile.role ?? "USER")}
             onChange={(e) =>
               setProfile({ ...profile, role: e.target.value })
             }
@@ -91,6 +103,7 @@ export default function Profile() {
             <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
           </select>
+
           <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">
             Sign out
           </Button>
