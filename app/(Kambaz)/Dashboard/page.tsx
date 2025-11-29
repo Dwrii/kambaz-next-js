@@ -51,6 +51,10 @@ function DashboardBody() {
     (state: RootState) => state.enrollmentsReducer.userEnrollments
   );
 
+  const isAdmin = currentUser?.role === "ADMIN";
+  const isFaculty = currentUser?.role === "FACULTY";
+  const canModify = isAdmin || isFaculty;
+
   const [course, setCourse] = useState<Course>({
     _id: "New Course",
     name: "New Course",
@@ -138,39 +142,43 @@ const onUpdateCourse = async () => {
       <h1 id="wd-dashboard-title">Dashboard</h1>
       <hr />
 
-      <h5>
-        New Course
-        <button
-          className="btn btn-primary float-end"
-          onClick={onAddNewCourse}
-        >
-          Add
-        </button>
-        <button
-          className="btn btn-warning float-end me-2"
-          onClick={onUpdateCourse}
-        >
-          Update
-        </button>
-      </h5>
+      {canModify && (
+        <>
+          <h5>
+            New Course
+            <button
+              className="btn btn-primary float-end"
+              onClick={onAddNewCourse}
+            >
+              Add
+            </button>
+            <button
+              className="btn btn-warning float-end me-2"
+              onClick={onUpdateCourse}
+            >
+              Update
+            </button>
+          </h5>
 
-      <br />
-      <FormControl
-        value={course.name}
-        className="mb-2"
-        onChange={(e) => {
-          const name = e.target.value;
-          setCourse({ ...course, name, _id: name });
-        }}
-      />
-      <FormControl
-        as="textarea"
-        rows={3}
-        value={course.description}
-        onChange={(e) => setCourse({ ...course, description: e.target.value })}
-      />
+          <br />
+          <FormControl
+            value={course.name}
+            className="mb-2"
+            onChange={(e) => {
+              const name = e.target.value;
+              setCourse({ ...course, name, _id: name });
+            }}
+          />
+          <FormControl
+            as="textarea"
+            rows={3}
+            value={course.description}
+            onChange={(e) => setCourse({ ...course, description: e.target.value })}
+          />
 
-      <hr />
+          <hr />
+        </>
+      )}
 
       <div className="d-flex justify-content-end mb-3">
         <Button
@@ -236,25 +244,29 @@ const onUpdateCourse = async () => {
                       <Button variant="primary">Go</Button>
 
                       <div>
-                        <button
-                          className="btn btn-danger ms-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            onDeleteCourse(course._id);
-                          }}
-                        >
-                          Delete
-                        </button>
+                        {canModify && (
+                          <>
+                            <button
+                              className="btn btn-danger ms-2"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onDeleteCourse(course._id);
+                              }}
+                            >
+                              Delete
+                            </button>
 
-                        <button
-                          className="btn btn-warning ms-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCourse(course);
-                          }}
-                        >
-                          Edit
-                        </button>
+                            <button
+                              className="btn btn-warning ms-2"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCourse(course);
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardBody>

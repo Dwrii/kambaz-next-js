@@ -14,7 +14,7 @@ export default function Profile() {
       state.accountReducer
   );
 
-    const updateProfile = async () => {
+  const updateProfile = async () => {
     const updatedProfile = await client.updateUser(profile);
     dispatch(setCurrentUser(updatedProfile));
   };
@@ -86,9 +86,11 @@ export default function Profile() {
               setProfile({ ...profile, email: e.target.value })
             }
           />
+
           <select
             className="form-control mb-2"
             id="wd-role"
+            value={String(profile.role ?? "USER")}
             onChange={(e) =>
               setProfile({ ...profile, role: e.target.value })
             }
@@ -98,7 +100,10 @@ export default function Profile() {
             <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
           </select>
-          <button onClick={updateProfile} className="btn btn-primary w-100 mb-2"> Update </button>
+
+          <button onClick={updateProfile} className="btn btn-primary w-100 mb-2">
+            Update
+          </button>
           <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">
             Sign out
           </Button>

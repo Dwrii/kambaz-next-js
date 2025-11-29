@@ -46,19 +46,24 @@ export default function Assignments() {
     (state: RootState) => state.assignmentsReducer
   );
 
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isAdmin = currentUser?.role === "ADMIN";
+  const isFaculty = currentUser?.role === "FACULTY";
+  const canModify = isAdmin || isFaculty;
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
-const [assignment, setAssignment] = useState<Assignment>({
-  _id: "",
-  course: cid ?? "",
-  title: "",
-  description: "",
-  points: 100,
-  dueDate: "",
-  availableFrom: "",
-  availableUntil: "",
-});
+  const [assignment, setAssignment] = useState<Assignment>({
+    _id: "",
+    course: cid ?? "",
+    title: "",
+    description: "",
+    points: 100,
+    dueDate: "",
+    availableFrom: "",
+    availableUntil: "",
+  });
 
   const [showDelete, setShowDelete] = useState(false);
   const [toDelete, setToDelete] = useState<Assignment | null>(null);
@@ -122,17 +127,20 @@ const [assignment, setAssignment] = useState<Assignment>({
             />
           </InputGroup>
         </div>
-        <div className="ms-3 flex-shrink-0">
-          <Button variant="secondary" className="me-2 group-btn">
-            + Group
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => setShow(true)}
-          >
-            + Assignment
-          </Button>
-        </div>
+
+        {canModify && (
+          <div className="ms-3 flex-shrink-0">
+            <Button variant="secondary" className="me-2 group-btn">
+              + Group
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setShow(true)}
+            >
+              + Assignment
+            </Button>
+          </div>
+        )}
       </div>
 
       <AssignmentChange
@@ -224,13 +232,15 @@ const [assignment, setAssignment] = useState<Assignment>({
                     </div>
                   </div>
 
-                  <AssignmentControlButtons
-                    assignmentId={a._id}
-                    deleteAssignment={() => {
-                      setToDelete(a);
-                      setShowDelete(true);
-                    }}
-                  />
+                  {canModify && (
+                    <AssignmentControlButtons
+                      assignmentId={a._id}
+                      deleteAssignment={() => {
+                        setToDelete(a);
+                        setShowDelete(true);
+                      }}
+                    />
+                  )}
                 </ListGroupItem>
               ))}
           </ListGroup>
@@ -238,5 +248,4 @@ const [assignment, setAssignment] = useState<Assignment>({
       </ListGroup>
     </div>
   );
-  
 }

@@ -37,6 +37,13 @@ export default function Modules() {
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
 
+  const { currentUser } = useSelector(
+    (state: any) => state.accountReducer
+  );
+  const isAdmin = currentUser?.role === "ADMIN";
+  const isFaculty = currentUser?.role === "FACULTY";
+  const canModify = isAdmin || isFaculty;
+
   const fetchModules = async () => {
     if (!cid) return;
     const data = await client.findModulesForCourse(cid);
@@ -70,11 +77,14 @@ export default function Modules() {
 
   return (
     <div>
-      <ModulesControls
-        moduleName={moduleName}
-        setModuleName={setModuleName}
-        addModule={onCreateModuleForCourse}
-      />
+
+      {canModify && (
+        <ModulesControls
+          moduleName={moduleName}
+          setModuleName={setModuleName}
+          addModule={onCreateModuleForCourse}
+        />
+      )}
 
       <br />
       <br />
@@ -107,11 +117,13 @@ export default function Modules() {
                 />
               )}
 
-              <ModuleControlButtons
-                moduleId={module._id}
-                deleteModule={onRemoveModule}
-                editModule={(moduleId) => dispatch(editModule(moduleId))}
-              />
+              {canModify && (
+                <ModuleControlButtons
+                  moduleId={module._id}
+                  deleteModule={onRemoveModule}
+                  editModule={(moduleId) => dispatch(editModule(moduleId))}
+                />
+              )}
             </div>
 
             {module.lessons && (

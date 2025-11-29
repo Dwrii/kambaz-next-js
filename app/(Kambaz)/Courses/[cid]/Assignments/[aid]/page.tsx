@@ -45,6 +45,13 @@ export default function AssignmentEditor() {
       state.assignmentsReducer
   );
 
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isAdmin = currentUser?.role === "ADMIN";
+  const isFaculty = currentUser?.role === "FACULTY";
+  const canModify = isAdmin || isFaculty;
+
+  const disabled = !canModify;
+
   const isNew = aid === "new";
 
   const original = assignments.find(
@@ -78,6 +85,7 @@ export default function AssignmentEditor() {
   }, [isNew, original, cid, router]);
 
   const handleCheckbox = (option: string) => {
+    if (disabled) return;
     const current = assignment.onlineEntryOptions || [];
     setAssignment({
       ...assignment,
@@ -88,6 +96,8 @@ export default function AssignmentEditor() {
   };
 
   const handleSave = async () => {
+    if (disabled) return;
+
     if (isNew) {
       const created = await client.createAssignmentForCourse(cid, assignment);
       dispatch(addAssignment(created));
@@ -105,6 +115,7 @@ export default function AssignmentEditor() {
           <FormLabel>Assignment Name</FormLabel>
           <FormControl
             type="text"
+            disabled={disabled}
             value={assignment.title}
             onChange={(e) =>
               setAssignment({ ...assignment, title: e.target.value })
@@ -117,6 +128,7 @@ export default function AssignmentEditor() {
           <FormControl
             as="textarea"
             rows={6}
+            disabled={disabled}
             value={assignment.description}
             onChange={(e) =>
               setAssignment({ ...assignment, description: e.target.value })
@@ -125,12 +137,11 @@ export default function AssignmentEditor() {
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-points">
-          <FormLabel column sm={2}>
-            Points
-          </FormLabel>
+          <FormLabel column sm={2}>Points</FormLabel>
           <Col sm={4}>
             <FormControl
               type="number"
+              disabled={disabled}
               value={assignment.points}
               onChange={(e) =>
                 setAssignment({
@@ -143,11 +154,10 @@ export default function AssignmentEditor() {
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-group">
-          <FormLabel column sm={2}>
-            Assignment Group
-          </FormLabel>
+          <FormLabel column sm={2}>Assignment Group</FormLabel>
           <Col sm={4}>
             <FormSelect
+              disabled={disabled}
               value={assignment.group}
               onChange={(e) =>
                 setAssignment({ ...assignment, group: e.target.value })
@@ -163,11 +173,10 @@ export default function AssignmentEditor() {
         </FormGroup>
 
         <FormGroup as={Row} className="mb-3" controlId="wd-display-grade-as">
-          <FormLabel column sm={2}>
-            Display Grade as
-          </FormLabel>
+          <FormLabel column sm={2}>Display Grade as</FormLabel>
           <Col sm={4}>
             <FormSelect
+              disabled={disabled}
               value={assignment.displayGradeAs}
               onChange={(e) =>
                 setAssignment({
@@ -189,6 +198,7 @@ export default function AssignmentEditor() {
             <FormGroup className="mb-3" controlId="wd-submission-type">
               <FormLabel>Submission Type</FormLabel>
               <FormSelect
+                disabled={disabled}
                 value={assignment.submissionType}
                 onChange={(e) =>
                   setAssignment({
@@ -216,10 +226,9 @@ export default function AssignmentEditor() {
                   <FormCheck
                     key={opt}
                     type="checkbox"
+                    disabled={disabled}
                     label={opt}
-                    checked={
-                      assignment.onlineEntryOptions?.includes(opt) || false
-                    }
+                    checked={assignment.onlineEntryOptions?.includes(opt) || false}
                     onChange={() => handleCheckbox(opt)}
                   />
                 ))}
@@ -234,6 +243,7 @@ export default function AssignmentEditor() {
               <FormLabel>Assign to</FormLabel>
               <FormControl
                 type="text"
+                disabled={disabled}
                 value={assignment.assignTo}
                 onChange={(e) =>
                   setAssignment({ ...assignment, assignTo: e.target.value })
@@ -247,6 +257,7 @@ export default function AssignmentEditor() {
                   <FormLabel>Due</FormLabel>
                   <FormControl
                     type="date"
+                    disabled={disabled}
                     value={assignment.due || ""}
                     onChange={(e) =>
                       setAssignment({ ...assignment, due: e.target.value })
@@ -262,6 +273,7 @@ export default function AssignmentEditor() {
                   <FormLabel>Available from</FormLabel>
                   <FormControl
                     type="date"
+                    disabled={disabled}
                     value={assignment.availableFrom || ""}
                     onChange={(e) =>
                       setAssignment({
@@ -272,11 +284,13 @@ export default function AssignmentEditor() {
                   />
                 </FormGroup>
               </Col>
+
               <Col sm={4}>
                 <FormGroup controlId="wd-available-until">
                   <FormLabel>Until</FormLabel>
                   <FormControl
                     type="date"
+                    disabled={disabled}
                     value={assignment.availableUntil || ""}
                     onChange={(e) =>
                       setAssignment({
@@ -298,9 +312,12 @@ export default function AssignmentEditor() {
           >
             Cancel
           </Link>
-          <Button variant="danger" onClick={handleSave}>
-            Save
-          </Button>
+
+          {canModify && (
+            <Button variant="danger" onClick={handleSave}>
+              Save
+            </Button>
+          )}
         </div>
       </Form>
     </div>

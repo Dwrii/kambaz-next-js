@@ -201,7 +201,32 @@
   "role": "STUDENT",
   "lastActivity": "2025-10-31",
   "totalActivity": "00:00:00"
-  }
+  },
+
+{
+  "_id": "0022221",
+  "firstName": "Bob",
+  "lastName": "Faculty",
+  "username": "faculty1",
+  "password": "123",
+  "role": "FACULTY",
+  "section": "S000",
+  "loginId": "FAC1",
+  "lastActivity": "2025-09-01",
+  "totalActivity": "02:00:00"
+},
+{
+  "_id": "0033331",
+  "firstName": "Dummy013",
+  "lastName": "Admin",
+  "username": "admin1",
+  "password": "123",
+  "role": "ADMIN",
+  "section": "NONE",
+  "loginId": "ADM1",
+  "lastActivity": "2025-09-01",
+  "totalActivity": "03:00:00"
+}
 
   ]
   
