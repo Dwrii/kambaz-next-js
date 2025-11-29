@@ -46,7 +46,15 @@ export default function Assignments() {
     (state: RootState) => state.assignmentsReducer
   );
 
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  interface RootState {
+  accountReducer: { currentUser: { role?: string } | null };
+  assignmentsReducer: { assignments: Assignment[] };
+}
+
+const { currentUser } = useSelector(
+  (state: RootState) => state.accountReducer
+);
+
   const isAdmin = currentUser?.role === "ADMIN";
   const isFaculty = currentUser?.role === "FACULTY";
   const canModify = isAdmin || isFaculty;

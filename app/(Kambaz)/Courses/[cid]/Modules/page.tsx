@@ -37,9 +37,18 @@ export default function Modules() {
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
 
-  const { currentUser } = useSelector(
-    (state: any) => state.accountReducer
-  );
+  interface AccountState {
+  currentUser: { role?: string } | null;
+}
+
+interface RootState {
+  modulesReducer: { modules: Module[] };
+  accountReducer: AccountState;
+}
+
+const { currentUser } = useSelector(
+  (state: RootState) => state.accountReducer
+);
   const isAdmin = currentUser?.role === "ADMIN";
   const isFaculty = currentUser?.role === "FACULTY";
   const canModify = isAdmin || isFaculty;
