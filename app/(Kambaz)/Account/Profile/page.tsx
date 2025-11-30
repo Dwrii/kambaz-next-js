@@ -10,8 +10,9 @@ export default function Profile() {
   const [profile, setProfile] = useState<Record<string, unknown>>({});
   const dispatch = useDispatch();
   const { currentUser } = useSelector(
-    (state: { accountReducer: { currentUser: Record<string, unknown> | null } }) =>
-      state.accountReducer
+    (state: {
+      accountReducer: { currentUser: Record<string, unknown> | null };
+    }) => state.accountReducer
   );
 
   const updateProfile = async () => {
@@ -82,26 +83,26 @@ export default function Profile() {
             id="wd-email"
             className="mb-2"
             defaultValue={String(profile.email ?? "")}
-            onChange={(e) =>
-              setProfile({ ...profile, email: e.target.value })
-            }
+            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
           />
 
           <select
             className="form-control mb-2"
             id="wd-role"
             value={String(profile.role ?? "USER")}
-            onChange={(e) =>
-              setProfile({ ...profile, role: e.target.value })
-            }
+            onChange={(e) => setProfile({ ...profile, role: e.target.value })}
           >
             <option value="USER">User</option>
             <option value="ADMIN">Admin</option>
             <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
+            <option value="TA">Assistant</option>
           </select>
 
-          <button onClick={updateProfile} className="btn btn-primary w-100 mb-2">
+          <button
+            onClick={updateProfile}
+            className="btn btn-primary w-100 mb-2"
+          >
             Update
           </button>
           <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">

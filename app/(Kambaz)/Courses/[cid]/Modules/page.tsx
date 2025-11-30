@@ -49,9 +49,13 @@ interface RootState {
 const { currentUser } = useSelector(
   (state: RootState) => state.accountReducer
 );
-  const isAdmin = currentUser?.role === "ADMIN";
-  const isFaculty = currentUser?.role === "FACULTY";
-  const canModify = isAdmin || isFaculty;
+
+const isAdmin = currentUser?.role === "ADMIN";
+const isFaculty = currentUser?.role === "FACULTY";
+const isTA = currentUser?.role === "TA";
+
+const canModify = isAdmin || isFaculty || isTA;
+
 
   const fetchModules = async () => {
     if (!cid) return;

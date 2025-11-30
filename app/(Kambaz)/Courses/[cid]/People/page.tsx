@@ -7,5 +7,5 @@ interface PeopleRedirectProps {
 }
 
 export default function PeopleRedirect({ params }: PeopleRedirectProps) {
-  redirect(`/Courses/${params.cid}/People/Table`);
+  redirect(`/Courses/${params.cid}/People`);
 }

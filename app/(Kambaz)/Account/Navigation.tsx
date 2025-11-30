@@ -1,21 +1,65 @@
 "use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Nav, NavLink } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
+type CurrentUser = {
+  role?: string;
+} | null;
+
+interface AccountState {
+  currentUser: CurrentUser;
+}
+
+interface RootState {
+  accountReducer: AccountState;
+}
+
 export default function AccountNavigation() {
-  const { currentUser } = useSelector((state: { accountReducer: { currentUser: unknown } }) => state.accountReducer);
-  const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
+  const pathname = usePathname();
+
+  const currentUser = useSelector(
+    (state: RootState) => state.accountReducer.currentUser
+  );
+
   return (
-    <div id="wd-account-navigation" className="wd list-group fs-5 rounded-0">
-      <Link href="/Account/Signin" id="wd-account-signin-link" className="list-group-item active border-0" >
+    <Nav id="wd-account-navigation" variant="pills" className="flex-column fs-5">
+      
+      <NavLink
+        as={Link}
+        href="/Account/Signin"
+        active={pathname.endsWith("Signin")}
+      >
         Signin
-      </Link>
-      <Link href="/Account/Signup" id="wd-account-signup-link" className="list-group-item text-danger border-0">
+      </NavLink>
+
+      <NavLink
+        as={Link}
+        href="/Account/Signup"
+        active={pathname.endsWith("Signup")}
+      >
         Signup
-      </Link>
-      <Link href="/Account/Profile" id="wd-account-profile-link" className="list-group-item text-danger border-0">
+      </NavLink>
+
+      <NavLink
+        as={Link}
+        href="/Account/Profile"
+        active={pathname.endsWith("Profile")}
+      >
         Profile
-      </Link>
-    </div>
+      </NavLink>
+
+      {currentUser && currentUser.role === "ADMIN" && (
+        <NavLink
+          as={Link}
+          href="/Account/Users"
+          active={pathname.endsWith("Users")}
+        >
+          Users
+        </NavLink>
+      )}
+    </Nav>
   );
 }
