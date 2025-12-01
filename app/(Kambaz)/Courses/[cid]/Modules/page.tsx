@@ -27,10 +27,6 @@ interface Module {
   editing?: boolean;
 }
 
-interface RootState {
-  modulesReducer: { modules: Module[] };
-}
-
 export default function Modules() {
   const { cid } = useParams<{ cid: string }>();
   const dispatch = useDispatch();
@@ -75,18 +71,18 @@ const canModify = isAdmin || isFaculty || isTA;
     setModuleName("");
   };
 
-  const onUpdateModule = async (module: Module) => {
-    await client.updateModule(module);
-    const updatedModules = modules.map((m: Module) =>
-      m._id === module._id ? module : m
-    );
-    dispatch(setModules(updatedModules));
-  };
+const onUpdateModule = async (module: Module) => {
+  await client.updateModule(cid, module);
+  const updatedModules = modules.map((m) =>
+    m._id === module._id ? module : m
+  );
+  dispatch(setModules(updatedModules));
+};
 
-  const onRemoveModule = async (moduleId: string) => {
-    await client.deleteModule(moduleId);
-    dispatch(deleteModule(moduleId));
-  };
+const onRemoveModule = async (moduleId: string) => {
+  await client.deleteModule(cid, moduleId);
+  dispatch(deleteModule(moduleId));
+};
 
   return (
     <div>

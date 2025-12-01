@@ -17,10 +17,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import AssignmentControlButtons from "./AssignmentControlButtons";
 import AssignmentChange from "./AssignmentChange";
-import {
-  setAssignments,
-  deleteAssignment,
-} from "./reducer";
+import { setAssignments, deleteAssignment } from "./reducer";
 import * as client from "./client";
 import "./assignments.css";
 
@@ -47,20 +44,19 @@ export default function Assignments() {
   );
 
   interface RootState {
-  accountReducer: { currentUser: { role?: string } | null };
-  assignmentsReducer: { assignments: Assignment[] };
-}
+    accountReducer: { currentUser: { role?: string } | null };
+    assignmentsReducer: { assignments: Assignment[] };
+  }
 
-const { currentUser } = useSelector(
-  (state: RootState) => state.accountReducer
-);
+  const { currentUser } = useSelector(
+    (state: RootState) => state.accountReducer
+  );
 
-const isAdmin = currentUser?.role === "ADMIN";
-const isFaculty = currentUser?.role === "FACULTY";
-const isTA = currentUser?.role === "TA";
+  const isAdmin = currentUser?.role === "ADMIN";
+  const isFaculty = currentUser?.role === "FACULTY";
+  const isTA = currentUser?.role === "TA";
 
-const canModify = isAdmin || isFaculty || isTA;
-
+  const canModify = isAdmin || isFaculty || isTA;
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -144,10 +140,7 @@ const canModify = isAdmin || isFaculty || isTA;
             <Button variant="secondary" className="me-2 group-btn">
               + Group
             </Button>
-            <Button
-              variant="danger"
-              onClick={() => setShow(true)}
-            >
+            <Button variant="danger" onClick={() => setShow(true)}>
               + Assignment
             </Button>
           </div>
@@ -229,15 +222,18 @@ const canModify = isAdmin || isFaculty || isTA;
                       <div className="text-muted small mt-1">
                         {a.availableFrom && (
                           <>
-                            <b>Available From:</b> {a.availableFrom} <span className="mx-1">|</span>
+                            <b>Available From:</b> {a.availableFrom}{" "}
+                            <span className="mx-1">|</span>
                           </>
                         )}
                         {a.availableUntil && (
                           <>
-                            <b>Until:</b> {a.availableUntil} <span className="mx-1">|</span>
+                            <b>Until:</b> {a.availableUntil}{" "}
+                            <span className="mx-1">|</span>
                           </>
                         )}
-                        <b>Due:</b> {a.dueDate || "—"} <span className="mx-1">|</span>
+                        <b>Due:</b> {a.dueDate || "—"}{" "}
+                        <span className="mx-1">|</span>
                         {a.points} pts
                       </div>
                     </div>

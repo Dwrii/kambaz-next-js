@@ -7,12 +7,11 @@ const ASSIGNMENTS_API = `${HTTP_SERVER}/api/assignments`;
 export interface Assignment {
   _id?: string;
   course?: string;
-  title?: string;
+  name?: string;
   description?: string;
   points?: number;
   dueDate?: string;
-  availableFrom?: string;
-  availableUntil?: string;
+  availableDate?: string;
 }
 
 export const findAssignmentsForCourse = async (courseId: string) => {
