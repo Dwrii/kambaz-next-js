@@ -1,0 +1,43 @@
+.wd-quiz-editor-container {
+  padding: 25px;
+  max-width: 900px;
+}
+
+.wd-quiz-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+.wd-quiz-tab {
+  padding: 10px 18px;
+  margin-right: 10px;
+  font-weight: 600;
+  color: #666;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.wd-quiz-tab.active {
+  color: black;
+  border-bottom: 3px solid #cc0000;
+}
+
+.wd-quiz-card {
+  background: white;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.wd-quiz-editor-buttons {
+  margin-top: 20px;
+}
+
+button.btn-danger {
+  font-weight: 600;
+}
+
+button.btn-success {
+  font-weight: 600;
+}
