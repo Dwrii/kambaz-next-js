@@ -13,17 +13,28 @@ import Col from "react-bootstrap/Col";
 import * as client from "../../client";
 import "./quiz-questions.css";
 
+interface Question {
+  _id: string;
+  title: string;
+  type: "multiple" | "truefalse" | "fill";
+  points: number;
+  text: string;
+  correctAnswer: string;
+  choices?: string[];
+  editing?: boolean;
+}
+
 export default function QuizQuestionsEditor() {
   const { cid, qid } = useParams() as { cid: string; qid: string };
   const router = useRouter();
 
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [quiz, setQuiz] = useState<any>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [quiz, setQuiz] = useState<Record<string, unknown> | null>(null);
 
   const loadQuiz = async () => {
     const data = await client.findQuiz(qid);
     setQuiz(data);
-    setQuestions(data.questions || []);
+    setQuestions((data.questions as Question[]) || []);
   };
 
   useEffect(() => {
@@ -33,7 +44,7 @@ export default function QuizQuestionsEditor() {
   if (!quiz) return <div>Loading...</div>;
 
   const addNewQuestion = () => {
-    const newQuestion = {
+    const newQuestion: Question = {
       _id: Date.now().toString(),
       title: "New Question",
       type: "multiple",
@@ -47,9 +58,18 @@ export default function QuizQuestionsEditor() {
     setQuestions([...questions, newQuestion]);
   };
 
-  const updateQuestion = (index: number, field: string, value: any) => {
+  const updateQuestion = <K extends keyof Question>(
+    index: number,
+    field: K,
+    value: Question[K]
+  ) => {
     const updated = [...questions];
-    updated[index][field] = value;
+
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
+
     setQuestions(updated);
   };
 
@@ -121,7 +141,7 @@ export default function QuizQuestionsEditor() {
 
                 <div className="mt-3 fw-bold">Answers:</div>
                 {q.type === "multiple" &&
-                  q.choices.map((c: string, i: number) => (
+                  q.choices?.map((c, i) => (
                     <div key={i} className="ms-3">
                       {q.correctAnswer === c ? "✓ " : ""} {c}
                     </div>
@@ -156,7 +176,11 @@ export default function QuizQuestionsEditor() {
                     <Form.Select
                       value={q.type}
                       onChange={(e) =>
-                        updateQuestion(index, "type", e.target.value)
+                        updateQuestion(
+                          index,
+                          "type",
+                          e.target.value as Question["type"]
+                        )
                       }
                     >
                       <option value="multiple">Multiple Choice</option>
@@ -191,7 +215,7 @@ export default function QuizQuestionsEditor() {
                   <div>
                     <Form.Label className="fw-bold">Answers:</Form.Label>
 
-                    {q.choices.map((choice: string, ci: number) => (
+                    {q.choices?.map((choice, ci) => (
                       <Row key={ci} className="mb-2 align-items-center">
                         <Col sm={1}>
                           <Form.Check
@@ -209,7 +233,7 @@ export default function QuizQuestionsEditor() {
                             type="text"
                             value={choice}
                             onChange={(e) => {
-                              const newChoices = [...q.choices];
+                              const newChoices = [...(q.choices ?? [])];
                               newChoices[ci] = e.target.value;
                               updateQuestion(index, "choices", newChoices);
                             }}
@@ -223,7 +247,7 @@ export default function QuizQuestionsEditor() {
                       size="sm"
                       onClick={() =>
                         updateQuestion(index, "choices", [
-                          ...q.choices,
+                          ...(q.choices ?? []),
                           "New Option",
                         ])
                       }

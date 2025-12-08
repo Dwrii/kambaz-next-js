@@ -15,11 +15,31 @@ import * as client from "../../client";
 
 import "./quiz-editor.css";
 
+type QuizShape = {
+  title?: string;
+  description?: string;
+  quizType?: string;
+  assignmentGroup?: string;
+  shuffleAnswers?: boolean;
+  timeLimit?: number;
+  multipleAttempts?: boolean;
+  attemptsAllowed?: number;
+  showCorrectAnswers?: string;
+  accessCode?: string;
+  oneQuestionAtATime?: boolean;
+  webcamRequired?: boolean;
+  lockAfterAnswering?: boolean;
+  dueDate?: string;
+  availableDate?: string;
+  untilDate?: string;
+  published?: boolean;
+};
+
 export default function QuizEditor() {
   const { cid, qid } = useParams<{ cid: string; qid: string }>();
   const router = useRouter();
 
-  const [quiz, setQuiz] = useState<any>(null);
+ const [quiz, setQuiz] = useState<QuizShape | null>(null);
 
   const loadQuiz = async () => {
     const data = await client.findQuiz(qid);
@@ -35,7 +55,7 @@ export default function QuizEditor() {
 
   if (!quiz) return <div>Loading...</div>;
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: string, value: unknown) => {
     setQuiz({ ...quiz, [field]: value });
   };
 
@@ -71,7 +91,7 @@ export default function QuizEditor() {
         <Form.Label className="fw-semibold">Quiz Title</Form.Label>
         <Form.Control
           type="text"
-          value={quiz.title}
+          value={quiz.title as string}
           onChange={(e) => updateField("title", e.target.value)}
         />
       </Form.Group>
@@ -81,7 +101,7 @@ export default function QuizEditor() {
         <Form.Control
           as="textarea"
           rows={5}
-          value={quiz.description}
+          value={quiz.description as string}
           onChange={(e) => updateField("description", e.target.value)}
         />
       </Form.Group>
@@ -91,7 +111,7 @@ export default function QuizEditor() {
           <Form.Group className="mb-3">
             <Form.Label className="fw-semibold">Quiz Type</Form.Label>
             <Form.Select
-              value={quiz.quizType}
+              value={quiz.quizType as string}
               onChange={(e) => updateField("quizType", e.target.value)}
             >
               <option>Graded Quiz</option>
@@ -104,7 +124,7 @@ export default function QuizEditor() {
           <Form.Group className="mb-3">
             <Form.Label className="fw-semibold">Assignment Group</Form.Label>
             <Form.Select
-              value={quiz.assignmentGroup}
+              value={quiz.assignmentGroup as string}
               onChange={(e) => updateField("assignmentGroup", e.target.value)}
             >
               <option>Quizzes</option>
@@ -119,7 +139,7 @@ export default function QuizEditor() {
           <Form.Check
             type="checkbox"
             label="Shuffle Answers"
-            checked={quiz.shuffleAnswers}
+            checked={quiz.shuffleAnswers as boolean}
             onChange={(e) => updateField("shuffleAnswers", e.target.checked)}
           />
 
@@ -128,17 +148,17 @@ export default function QuizEditor() {
               <Form.Check
                 type="checkbox"
                 label="Time Limit"
-                checked={quiz.timeLimit > 0}
+                checked={(quiz.timeLimit as number) > 0}
                 onChange={(e) =>
                   updateField("timeLimit", e.target.checked ? 20 : 0)
                 }
               />
             </Col>
             <Col sm={4}>
-              {quiz.timeLimit > 0 && (
+              {(quiz.timeLimit as number) > 0 && (
                 <Form.Control
                   type="number"
-                  value={quiz.timeLimit}
+                  value={quiz.timeLimit as number}
                   onChange={(e) =>
                     updateField("timeLimit", Number(e.target.value))
                   }
@@ -150,7 +170,7 @@ export default function QuizEditor() {
           <Form.Check
             type="checkbox"
             label="Allow Multiple Attempts"
-            checked={quiz.multipleAttempts}
+            checked={quiz.multipleAttempts as boolean}
             onChange={(e) => updateField("multipleAttempts", e.target.checked)}
           />
 
@@ -160,7 +180,7 @@ export default function QuizEditor() {
               <Col sm={3}>
                 <Form.Control
                   type="number"
-                  value={quiz.attemptsAllowed}
+                  value={quiz.attemptsAllowed as number}
                   onChange={(e) =>
                     updateField("attemptsAllowed", Number(e.target.value))
                   }
@@ -170,11 +190,9 @@ export default function QuizEditor() {
           )}
 
           <Form.Group className="mt-4">
-            <Form.Label className="fw-semibold">
-              Show Correct Answers
-            </Form.Label>
+            <Form.Label className="fw-semibold">Show Correct Answers</Form.Label>
             <Form.Select
-              value={quiz.showCorrectAnswers}
+              value={quiz.showCorrectAnswers as string}
               onChange={(e) =>
                 updateField("showCorrectAnswers", e.target.value)
               }
@@ -189,7 +207,7 @@ export default function QuizEditor() {
             <Form.Label className="fw-semibold">Access Code</Form.Label>
             <Form.Control
               type="text"
-              value={quiz.accessCode}
+              value={quiz.accessCode as string}
               onChange={(e) => updateField("accessCode", e.target.value)}
             />
           </Form.Group>
@@ -198,7 +216,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-3"
             label="One Question at a Time"
-            checked={quiz.oneQuestionAtATime}
+            checked={quiz.oneQuestionAtATime as boolean}
             onChange={(e) =>
               updateField("oneQuestionAtATime", e.target.checked)
             }
@@ -208,7 +226,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-2"
             label="Webcam Required"
-            checked={quiz.webcamRequired}
+            checked={quiz.webcamRequired as boolean}
             onChange={(e) => updateField("webcamRequired", e.target.checked)}
           />
 
@@ -216,7 +234,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-2"
             label="Lock Questions After Answering"
-            checked={quiz.lockAfterAnswering}
+            checked={quiz.lockAfterAnswering as boolean}
             onChange={(e) =>
               updateField("lockAfterAnswering", e.target.checked)
             }
@@ -233,7 +251,7 @@ export default function QuizEditor() {
               <Form.Label>Due</Form.Label>
               <Form.Control
                 type="datetime-local"
-                value={quiz.dueDate || ""}
+                value={(quiz.dueDate as string) || ""}
                 onChange={(e) => updateField("dueDate", e.target.value)}
               />
             </Col>
@@ -244,7 +262,7 @@ export default function QuizEditor() {
               <Form.Label>Available From</Form.Label>
               <Form.Control
                 type="datetime-local"
-                value={quiz.availableDate || ""}
+                value={(quiz.availableDate as string) || ""}
                 onChange={(e) => updateField("availableDate", e.target.value)}
               />
             </Col>
@@ -253,7 +271,7 @@ export default function QuizEditor() {
               <Form.Label>Until</Form.Label>
               <Form.Control
                 type="datetime-local"
-                value={quiz.untilDate || ""}
+                value={(quiz.untilDate as string) || ""}
                 onChange={(e) => updateField("untilDate", e.target.value)}
               />
             </Col>
