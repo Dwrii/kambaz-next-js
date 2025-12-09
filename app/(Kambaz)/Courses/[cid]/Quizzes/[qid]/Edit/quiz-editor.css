@@ -41,3 +41,25 @@ button.btn-danger {
 button.btn-success {
   font-weight: 600;
 }
+
+.wd-quiz-editor-description .ql-toolbar {
+  border-color: #ced4da;
+  background-color: #f8f9fa;
+}
+
+.wd-quiz-editor-description .ql-container {
+  border-color: #ced4da;
+  min-height: 160px;                     
+}
+
+.wd-quiz-editor-description .ql-editor {
+  min-height: 130px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 0.75rem 0.9rem;
+}
+
+.wd-quiz-editor-description .ql-editor.ql-blank::before {
+  color: #adb5bd;
+  font-style: italic;
+}

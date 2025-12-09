@@ -12,6 +12,7 @@ export type Course = {
   startDate?: string;
   endDate?: string;
   image?: string;
+  owner?: string;  
 };
 
 interface CoursesState {

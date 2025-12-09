@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
-export const USERS_API = `${HTTP_SERVER}/api/users`;
-export const COURSES_API = `${HTTP_SERVER}/api/courses`;
+const USERS_API = `${HTTP_SERVER}/api/users`;
+const COURSES_API = `${HTTP_SERVER}/api/courses`;
 
 export interface Module {
   _id?: string;
@@ -19,6 +19,7 @@ export interface Course {
   number?: string;
   description?: string;
   image?: string;
+  owner?: string;   
 }
 
 export const createModuleForCourse = async (
@@ -32,10 +33,9 @@ export const createModuleForCourse = async (
   return response.data;
 };
 
-export const findModulesForCourse = async (cid: string) => {
-  const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
-  const { data } = await axios.get(`${HTTP_SERVER}/api/courses/${cid}/modules`);
-  return data;
+export const findModulesForCourse = async (courseId: string) => {
+  const response = await axios.get(`${COURSES_API}/${courseId}/modules`);
+  return response.data;
 };
 
 export const deleteModule = async (courseId: string, moduleId: string) => {
@@ -80,27 +80,9 @@ export const updateCourse = async (course: Course) => {
   return data;
 };
 
-export const enrollIntoCourse = async (
-  userId: string,
-  courseId: string
-) => {
-  const { data } = await axiosWithCredentials.post(
-    `${USERS_API}/${userId}/courses/${courseId}`
-  );
-  return data;
-};
-
-export const unenrollFromCourse = async (
-  userId: string,
-  courseId: string
-) => {
-  const { data } = await axiosWithCredentials.delete(
-    `${USERS_API}/${userId}/courses/${courseId}`
-  );
-  return data;
-};
-
 export const findUsersForCourse = async (courseId: string) => {
-  const response = await axios.get(`${COURSES_API}/${courseId}/users`);
+  const response = await axios.get(`${COURSES_API}/${courseId}/users`, {
+    withCredentials: true,
+  });
   return response.data;
 };

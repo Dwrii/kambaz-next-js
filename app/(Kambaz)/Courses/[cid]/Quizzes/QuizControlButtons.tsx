@@ -27,23 +27,27 @@ export default function QuizControlButtons({
   return (
     <div className="d-flex align-items-center gap-2">
 
-      <span
-        style={{
-          display: "inline-flex",
-          width: "28px",
-          height: "28px",
-          borderRadius: "50%",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: isPublished ? "#198754" : "#dc3545",
-        }}
-      >
-        {isPublished ? (
-          <FaCheck style={{ color: "white", fontSize: "14px" }} />
-        ) : (
-          <FaTimes style={{ color: "white", fontSize: "14px" }} />
-        )}
-      </span>
+<span
+  onClick={onPublishToggle}
+  style={{
+    display: "inline-flex",
+    width: "28px",
+    height: "28px",
+    borderRadius: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: isPublished ? "#198754" : "#dc3545",
+    cursor: "pointer",
+  }}
+  title={isPublished ? "Unpublish" : "Publish"}
+>
+  {isPublished ? (
+    <FaCheck style={{ color: "white", fontSize: "14px" }} />
+  ) : (
+    <FaTimes style={{ color: "white", fontSize: "14px" }} />
+  )}
+</span>
+
 
       <Dropdown
         align="end"

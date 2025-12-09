@@ -10,31 +10,39 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
 import * as client from "../../client";
 import "./quiz-questions.css";
 
-interface Question {
-  _id: string;
-  title: string;
-  type: "multiple" | "truefalse" | "fill";
-  points: number;
-  text: string;
-  correctAnswer: string;
-  choices?: string[];
-  editing?: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReactQuill = dynamic<any>(
+  () => import("react-quill-new").then((mod) => mod.default),
+  { ssr: false }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Question = any;
 
 export default function QuizQuestionsEditor() {
   const { cid, qid } = useParams() as { cid: string; qid: string };
   const router = useRouter();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [quiz, setQuiz] = useState<Record<string, unknown> | null>(null);
 
   const loadQuiz = async () => {
     const data = await client.findQuiz(qid);
     setQuiz(data);
-    setQuestions((data.questions as Question[]) || []);
+    const qs = (data.questions || []).map((q: Question) => ({
+      ...q,
+      editing: false,
+      backup: undefined,
+      isNew: false,
+    }));
+    setQuestions(qs);
   };
 
   useEffect(() => {
@@ -43,45 +51,132 @@ export default function QuizQuestionsEditor() {
 
   if (!quiz) return <div>Loading...</div>;
 
+  const buildCleanQuestions = (qs: Question[]) =>
+    qs.map(({ editing, backup, isNew, ...rest }) => rest);
+
+  const computeTotalPoints = (qs: Question[]) =>
+    qs.reduce((s, q) => s + Number(q.points || 0), 0);
+
   const addNewQuestion = () => {
     const newQuestion: Question = {
       _id: Date.now().toString(),
       title: "New Question",
-      type: "multiple",
+      type: "multiple", 
       points: 1,
       text: "",
       correctAnswer: "",
       choices: ["Option 1", "Option 2"],
       editing: true,
+      backup: undefined,
+      isNew: true,
     };
 
-    setQuestions([...questions, newQuestion]);
+    setQuestions((prev) => [...prev, newQuestion]);
   };
 
-  const updateQuestion = <K extends keyof Question>(
-    index: number,
-    field: K,
-    value: Question[K]
-  ) => {
-    const updated = [...questions];
+  const startEditing = (index: number) => {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      const q = updated[index];
 
-    updated[index] = {
-      ...updated[index],
-      [field]: value,
+      if (!q.backup) {
+        const { editing, backup, isNew, ...snapshot } = q;
+        updated[index] = {
+          ...q,
+          editing: true,
+          backup: snapshot, 
+        };
+      } else {
+        updated[index] = { ...q, editing: true };
+      }
+
+      return updated;
+    });
+  };
+
+  const cancelEdit = (index: number) => {
+    setQuestions((prev) => {
+      const q = prev[index];
+
+      if (q.isNew && !q.backup) {
+        return prev.filter((_, i) => i !== index);
+      }
+
+      const updated = [...prev];
+
+      if (q.backup) {
+        updated[index] = {
+          ...q.backup,
+          editing: false,
+          backup: undefined,
+          isNew: false,
+        };
+      } else {
+        updated[index] = { ...q, editing: false };
+      }
+
+      return updated;
+    });
+  };
+
+  const saveQuestion = async (index: number) => {
+    const finalized = questions.map((q, i) =>
+      i === index
+        ? { ...q, editing: false, backup: undefined, isNew: false }
+        : q
+    );
+    setQuestions(finalized);
+
+    const cleaned = buildCleanQuestions(finalized);
+
+    const totalPoints = computeTotalPoints(cleaned);
+
+    const updatedQuiz = {
+      ...quiz,
+      questions: cleaned,
+      points: totalPoints,
     };
 
-    setQuestions(updated);
+    await client.updateQuiz(qid, updatedQuiz);
+    setQuiz(updatedQuiz);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateQuestionField = (index: number, field: string, value: any) => {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
   const saveAll = async () => {
-    const cleaned = questions.map((q) => ({ ...q, editing: false }));
+    const finalized = questions.map((q) => ({ ...q, editing: false }));
 
-    setQuestions(cleaned);
+    const cleaned = buildCleanQuestions(finalized);
 
-    await client.updateQuiz(qid, { ...quiz, questions: cleaned });
+    const totalPoints = computeTotalPoints(cleaned);
+
+    const updatedQuiz = {
+      ...quiz,
+      questions: cleaned,
+      points: totalPoints,
+    };
+
+    await client.updateQuiz(qid, updatedQuiz);
+    setQuiz(updatedQuiz);
+
+    setQuestions(
+      cleaned.map((q: Question) => ({
+        ...q,
+        editing: false,
+        backup: undefined,
+        isNew: false,
+      }))
+    );
   };
 
-  const totalPoints = questions.reduce((s, q) => s + Number(q.points || 0), 0);
+  const totalPoints = computeTotalPoints(questions);
 
   return (
     <div className="wd-qq-container">
@@ -102,7 +197,7 @@ export default function QuizQuestionsEditor() {
         <div className="wd-points-display">Points {totalPoints}</div>
       </div>
 
-      <div className="wd-new-question-container">
+      <div className="wd-new-question-container mb-3">
         <Button
           variant="light"
           className="wd-new-question-btn"
@@ -111,6 +206,13 @@ export default function QuizQuestionsEditor() {
           + New Question
         </Button>
       </div>
+
+      {questions.length === 0 && (
+        <div className="text-muted fst-italic mb-3">
+          No questions yet. Click <strong>+ New Question</strong> to add your
+          first question.
+        </div>
+      )}
 
       {questions.map((q, index) => (
         <Card key={q._id} className="wd-question-card mt-3">
@@ -121,7 +223,12 @@ export default function QuizQuestionsEditor() {
                   <Col>
                     <h5>{q.title}</h5>
                     <div className="text-muted">
-                      {q.type} — {q.points} pts
+                      {q.type === "multiple"
+                        ? "Multiple Choice"
+                        : q.type === "truefalse"
+                        ? "True / False"
+                        : "Fill in the Blank"}{" "}
+                      — {q.points} pts
                     </div>
                   </Col>
 
@@ -129,7 +236,7 @@ export default function QuizQuestionsEditor() {
                     <Button
                       variant="outline-primary"
                       size="sm"
-                      onClick={() => updateQuestion(index, "editing", true)}
+                      onClick={() => startEditing(index)}
                     >
                       Edit
                     </Button>
@@ -137,13 +244,20 @@ export default function QuizQuestionsEditor() {
                 </Row>
 
                 <div className="mb-2 fw-bold">Question:</div>
-                <div className="ms-2">{q.text || "(No text)"}</div>
+                <div
+                  className="ms-2"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      q.text || "<span style='color:#888'>(No text)</span>",
+                  }}
+                />
 
                 <div className="mt-3 fw-bold">Answers:</div>
                 {q.type === "multiple" &&
-                  q.choices?.map((c, i) => (
+                  (q.choices || []).map((choice: string, i: number) => (
                     <div key={i} className="ms-3">
-                      {q.correctAnswer === c ? "✓ " : ""} {c}
+                      {q.correctAnswer === choice ? "✓ " : ""}
+                      {choice}
                     </div>
                   ))}
 
@@ -154,7 +268,12 @@ export default function QuizQuestionsEditor() {
                 )}
 
                 {q.type === "fill" && (
-                  <div className="ms-3">Correct Answer: {q.correctAnswer}</div>
+                  <div className="ms-3">
+                    Correct Answers:{" "}
+                    {(q.choices || []).length > 0
+                      ? q.choices.join(", ")
+                      : "(none)"}
+                  </div>
                 )}
               </>
             )}
@@ -167,7 +286,7 @@ export default function QuizQuestionsEditor() {
                       type="text"
                       value={q.title}
                       onChange={(e) =>
-                        updateQuestion(index, "title", e.target.value)
+                        updateQuestionField(index, "title", e.target.value)
                       }
                     />
                   </Col>
@@ -176,11 +295,7 @@ export default function QuizQuestionsEditor() {
                     <Form.Select
                       value={q.type}
                       onChange={(e) =>
-                        updateQuestion(
-                          index,
-                          "type",
-                          e.target.value as Question["type"]
-                        )
+                        updateQuestionField(index, "type", e.target.value)
                       }
                     >
                       <option value="multiple">Multiple Choice</option>
@@ -194,60 +309,99 @@ export default function QuizQuestionsEditor() {
                       type="number"
                       value={q.points}
                       onChange={(e) =>
-                        updateQuestion(index, "points", Number(e.target.value))
+                        updateQuestionField(
+                          index,
+                          "points",
+                          Number(e.target.value)
+                        )
                       }
                     />
                   </Col>
                 </Row>
 
                 <Form.Label className="fw-bold">Question:</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  value={q.text}
-                  onChange={(e) =>
-                    updateQuestion(index, "text", e.target.value)
+                <ReactQuill
+                  theme="snow"
+                  value={q.text || ""}
+                  onChange={(value: string) =>
+                    updateQuestionField(index, "text", value)
                   }
-                  className="mb-3"
+                  className="mb-3 wd-question-editor"
                 />
 
                 {q.type === "multiple" && (
                   <div>
                     <Form.Label className="fw-bold">Answers:</Form.Label>
 
-                    {q.choices?.map((choice, ci) => (
-                      <Row key={ci} className="mb-2 align-items-center">
-                        <Col sm={1}>
-                          <Form.Check
-                            type="radio"
-                            name={`correct-${index}`}
-                            checked={q.correctAnswer === choice}
-                            onChange={() =>
-                              updateQuestion(index, "correctAnswer", choice)
-                            }
-                          />
-                        </Col>
+                    {(q.choices || []).map(
+                      (choice: string, ci: number) => (
+                        <Row key={ci} className="mb-2 align-items-center">
+                          <Col sm={1}>
+                            <Form.Check
+                              type="radio"
+                              name={`correct-${index}`}
+                              checked={q.correctAnswer === choice}
+                              onChange={() =>
+                                updateQuestionField(
+                                  index,
+                                  "correctAnswer",
+                                  choice
+                                )
+                              }
+                            />
+                          </Col>
 
-                        <Col sm={10}>
-                          <Form.Control
-                            type="text"
-                            value={choice}
-                            onChange={(e) => {
-                              const newChoices = [...(q.choices ?? [])];
-                              newChoices[ci] = e.target.value;
-                              updateQuestion(index, "choices", newChoices);
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    ))}
+                          <Col sm={9}>
+                            <Form.Control
+                              type="text"
+                              value={choice}
+                              onChange={(e) => {
+                                const newChoices = [...(q.choices || [])];
+                                newChoices[ci] = e.target.value;
+                                updateQuestionField(
+                                  index,
+                                  "choices",
+                                  newChoices
+                                );
+                              }}
+                            />
+                          </Col>
+
+                          <Col sm={2}>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => {
+                                const newChoices = (q.choices || []).filter(
+                                  (_: string, j: number) => j !== ci
+                                );
+                                updateQuestionField(
+                                  index,
+                                  "choices",
+                                  newChoices
+                                );
+                                if (q.correctAnswer === choice) {
+                                  updateQuestionField(
+                                    index,
+                                    "correctAnswer",
+                                    ""
+                                  );
+                                }
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </Col>
+                        </Row>
+                      )
+                    )}
 
                     <Button
                       variant="outline-secondary"
                       size="sm"
                       onClick={() =>
-                        updateQuestion(index, "choices", [
-                          ...(q.choices ?? []),
+                        updateQuestionField(index, "choices", [
+                          ...(q.choices || []),
                           "New Option",
                         ])
                       }
@@ -269,7 +423,11 @@ export default function QuizQuestionsEditor() {
                       name={`tf-${index}`}
                       checked={q.correctAnswer === "true"}
                       onChange={() =>
-                        updateQuestion(index, "correctAnswer", "true")
+                        updateQuestionField(
+                          index,
+                          "correctAnswer",
+                          "true"
+                        )
                       }
                     />
 
@@ -279,7 +437,11 @@ export default function QuizQuestionsEditor() {
                       name={`tf-${index}`}
                       checked={q.correctAnswer === "false"}
                       onChange={() =>
-                        updateQuestion(index, "correctAnswer", "false")
+                        updateQuestionField(
+                          index,
+                          "correctAnswer",
+                          "false"
+                        )
                       }
                     />
                   </div>
@@ -287,14 +449,63 @@ export default function QuizQuestionsEditor() {
 
                 {q.type === "fill" && (
                   <div>
-                    <Form.Label className="fw-bold">Correct Answer:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={q.correctAnswer}
-                      onChange={(e) =>
-                        updateQuestion(index, "correctAnswer", e.target.value)
+                    <Form.Label className="fw-bold">
+                      Possible Correct Answers:
+                    </Form.Label>
+
+                    {(q.choices || []).map(
+                      (ans: string, ai: number) => (
+                        <Row key={ai} className="mb-2 align-items-center">
+                          <Col sm={10}>
+                            <Form.Control
+                              type="text"
+                              value={ans}
+                              onChange={(e) => {
+                                const newAnswers = [...(q.choices || [])];
+                                newAnswers[ai] = e.target.value;
+                                updateQuestionField(
+                                  index,
+                                  "choices",
+                                  newAnswers
+                                );
+                              }}
+                            />
+                          </Col>
+
+                          <Col sm={2}>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => {
+                                const newAnswers = (q.choices || []).filter(
+                                  (_: string, j: number) => j !== ai
+                                );
+                                updateQuestionField(
+                                  index,
+                                  "choices",
+                                  newAnswers
+                                );
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </Col>
+                        </Row>
+                      )
+                    )}
+
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() =>
+                        updateQuestionField(index, "choices", [
+                          ...(q.choices || []),
+                          "New Answer",
+                        ])
                       }
-                    />
+                    >
+                      + Add Answer
+                    </Button>
                   </div>
                 )}
 
@@ -302,7 +513,7 @@ export default function QuizQuestionsEditor() {
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => updateQuestion(index, "editing", false)}
+                    onClick={() => cancelEdit(index)}
                   >
                     Cancel
                   </Button>
@@ -311,7 +522,7 @@ export default function QuizQuestionsEditor() {
                     size="sm"
                     className="ms-2"
                     variant="danger"
-                    onClick={() => updateQuestion(index, "editing", false)}
+                    onClick={() => saveQuestion(index)}
                   >
                     Update Question
                   </Button>
@@ -322,18 +533,20 @@ export default function QuizQuestionsEditor() {
         </Card>
       ))}
 
-      <div className="wd-buttons-row mt-4 d-flex gap-2">
-        <Button variant="danger" onClick={saveAll}>
-          Save All Changes
-        </Button>
+<div className="wd-buttons-row mt-4 d-flex gap-2">
+  <Button variant="danger" onClick={saveAll}>
+    Save All Changes
+  </Button>
 
-        <Button
-          variant="primary"
-          onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)}
-        >
-          Preview Quiz
-        </Button>
-      </div>
+  <Button
+    variant="primary"
+    onClick={() =>
+      router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)
+    }
+  >
+    Preview Quiz
+  </Button>
+</div>
     </div>
   );
 }

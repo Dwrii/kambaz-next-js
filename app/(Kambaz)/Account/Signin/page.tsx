@@ -4,59 +4,103 @@ import { useRouter } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import * as db from "../../Database";
 import { FormControl, Button } from "react-bootstrap";
 import * as client from "../client";
 
-interface User {
+type Credentials = {
   username: string;
   password: string;
-  [key: string]: unknown;
-}
+};
 
 export default function Signin() {
-  const [credentials, setCredentials] = useState<User>({
-    username: "wurui2",
-    password: "123",
+  const [credentials, setCredentials] = useState<Credentials>({
+    username: "",
+    password: "",
   });
+  const [error, setError] = useState("");
+
   const dispatch = useDispatch();
   const router = useRouter();
 
-const signin = async () => {
-    const user =  await client.signin(credentials);
-    if (!user) return;
-    dispatch(setCurrentUser(user));
-    router.push("/Dashboard");
+  const handleSignin = async () => {
+    setError("");
+    try {
+      const user = await client.signin(credentials);
+      if (!user) {
+        setError("Invalid username or password.");
+        return;
+      }
+      dispatch(setCurrentUser(user));
+      router.push("/Dashboard");
+    } catch (_err) {
+      setError("Invalid username or password.");
+    }
   };
 
   return (
-    <div id="wd-signin-screen">
-      <h1>Sign in</h1>
+    <div style={{ padding: "40px 20px 40px 20px", marginLeft: "0px",
+      marginTop: "-30px",
+    }}>
+
+      <h1
+        className="mb-4"
+        style={{
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: "30px",
+          fontWeight: "bold",
+        }}
+      >
+        Northeastern University
+      </h1>
+
+      {error && (
+        <div className="text-danger mb-3 small">{error}</div>
+      )}
+
+      <label className="fw-semibold mt-3">
+        myNortheastern Username
+      </label>
       <FormControl
-        defaultValue={credentials.username}
+        id="wd-username"
+        className="mb-3"
+        value={credentials.username}
         onChange={(e) =>
           setCredentials({ ...credentials, username: e.target.value })
         }
-        className="mb-2"
-        placeholder="username"
-        id="wd-username"
       />
+
+      <label className="fw-semibold">
+        myNortheastern Password
+      </label>
       <FormControl
-        defaultValue={credentials.password}
+        id="wd-password"
+        className="mb-4"
+        type="password"
+        value={credentials.password}
         onChange={(e) =>
           setCredentials({ ...credentials, password: e.target.value })
         }
-        className="mb-2"
-        placeholder="password"
-        type="password"
-        id="wd-password"
       />
-      <Button onClick={signin} id="wd-signin-btn" className="w-100">
-        Sign in
+
+      <Button
+        onClick={handleSignin}
+        className="mb-2"
+        style={{
+          width: "200px",
+          backgroundColor: "#c62828",
+          border: "none",
+          padding: "10px 0",
+        }}
+      >
+        Log In
       </Button>
-      <Link id="wd-signup-link" href="/Account/Signup">
-        Sign up
-      </Link>
+
+      <div className="mt-3">
+        Need an account?{" "}
+        <Link href="/Account/Signup">
+          Sign up
+        </Link>
+      </div>
     </div>
   );
 }

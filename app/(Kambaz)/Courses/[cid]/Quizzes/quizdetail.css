@@ -52,19 +52,26 @@
   padding: 20px;
   border: 1px solid #ddd;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .wd-quiz-prop {
   display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 10px;
+  justify-content: center;   
+  align-items: center;
+  gap: 12px;               
+  margin-bottom: 6px;
 }
 
 .wd-prop-label {
-  width: 200px;
+  width: 220px;             
   font-weight: 600;
-  text-align: right;
+  text-align: right;       
+}
+
+.wd-prop-value {
+  min-width: 120px;         
+  text-align: left;        
 }
 
 .wd-quiz-due-table {

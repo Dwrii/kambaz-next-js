@@ -67,8 +67,10 @@ export default function Quizzes() {
   }, [cid]);
 
   const addQuiz = async () => {
+    if (!cid) return;
     const quiz = await client.createQuiz(cid as string);
     setQuizzes([...quizzes, quiz]);
+    router.push(`/Courses/${cid}/Quizzes/${quiz._id}/Edit`);
   };
 
   const togglePublish = async (quiz: Quiz) => {
@@ -96,6 +98,13 @@ export default function Quizzes() {
 
     return "Available";
   };
+
+  const visibleQuizzes = quizzes
+    .filter((q) => {
+      if (!isStudent) return true;
+      return q.published === true;
+    })
+    .filter((q) => q.title.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div id="wd-quizzes" className="p-3">
@@ -137,16 +146,19 @@ export default function Quizzes() {
           </div>
 
           <ListGroup className="wd-lessons rounded-0">
-            {quizzes
-              .filter((q) => {
-                if (!isStudent) return true; 
-                return q.published === true;
-              })
-
-              .filter((q) =>
-                q.title.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((q) => (
+            {visibleQuizzes.length === 0 ? (
+              <ListGroupItem className="text-center py-4 border-0">
+                {canModify ? (
+                  <span>
+                    No quizzes yet. Click{" "}
+                    <strong>+ Quiz</strong> to create your first quiz.
+                  </span>
+                ) : (
+                  <span>No quizzes are available yet.</span>
+                )}
+              </ListGroupItem>
+            ) : (
+              visibleQuizzes.map((q) => (
                 <ListGroupItem
                   key={q._id}
                   className="wd-lesson py-3 ps-0 pe-3 d-flex align-items-start justify-content-between border-0 border-bottom"
@@ -176,7 +188,9 @@ export default function Quizzes() {
                       <div className="text-muted small mt-1">
                         {availabilityStatus(q)} <span className="mx-1">|</span>
                         Due:{" "}
-                        {q.dueDate ? new Date(q.dueDate).toLocaleString() : "—"}
+                        {q.dueDate
+                          ? new Date(q.dueDate).toLocaleString()
+                          : "—"}
                         <span className="mx-1">|</span>
                         {q.points || 0} pts <span className="mx-1">|</span>
                         {q.numQuestions || 0} Questions
@@ -221,7 +235,8 @@ export default function Quizzes() {
                     />
                   )}
                 </ListGroupItem>
-              ))}
+              ))
+            )}
           </ListGroup>
         </ListGroupItem>
       </ListGroup>

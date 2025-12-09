@@ -8,6 +8,21 @@ interface HasId {
   _id: string;
 }
 
+export type User = {
+  _id?: string;
+  username?: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  dob?: string;
+  email?: string;
+  role?: string;
+  loginId?: string;
+  section?: string;
+  lastActivity?: string;
+  totalActivity?: string;
+};
+
 export const findAllUsers = async () => {
   const response = await axiosWithCredentials.get(USERS_API);
   return response.data;

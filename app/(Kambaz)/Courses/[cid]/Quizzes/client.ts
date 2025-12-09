@@ -45,15 +45,13 @@ export const deleteQuiz = async (quizId: string) => {
     return response.data;
 };
 
-export const updateQuiz = async (
-    quizId: string,
-    quiz: Record<string, unknown> 
-) => {
-    const response = await axiosWithCredentials.put(
-        `${HTTP_SERVER}/api/quizzes/${quizId}`,
-        quiz
-    );
-    return response.data;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const updateQuiz = async (quizId: string, quiz: any) => {
+  const response = await axiosWithCredentials.put(
+    `${HTTP_SERVER}/api/quizzes/${quizId}`,
+    quiz
+  );
+  return response.data;
 };
 
 

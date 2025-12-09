@@ -63,11 +63,25 @@
 }
 
 .question-nav-link {
-  color: #cc0000;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+
+  color: #b30000;
+  font-weight: 500;
+
+  border: none;          
+  outline: none;        
+  border-radius: 4px;
   cursor: pointer;
-  text-decoration: none;
 }
 
 .question-nav-link:hover {
-  text-decoration: underline;
+  background: #e6e6e6;
+}
+
+.question-nav-link.active {
+  background: #ddd;
+  font-weight: bold;
 }
