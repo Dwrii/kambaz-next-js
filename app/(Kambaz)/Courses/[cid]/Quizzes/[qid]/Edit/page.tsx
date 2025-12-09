@@ -15,27 +15,6 @@ import * as client from "../../client";
 
 import "./quiz-editor.css";
 
-<<<<<<< HEAD
-type QuizShape = {
-  title?: string;
-  description?: string;
-  quizType?: string;
-  assignmentGroup?: string;
-  shuffleAnswers?: boolean;
-  timeLimit?: number;
-  multipleAttempts?: boolean;
-  attemptsAllowed?: number;
-  showCorrectAnswers?: string;
-  accessCode?: string;
-  oneQuestionAtATime?: boolean;
-  webcamRequired?: boolean;
-  lockAfterAnswering?: boolean;
-  dueDate?: string;
-  availableDate?: string;
-  untilDate?: string;
-  published?: boolean;
-};
-=======
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -65,17 +44,12 @@ type AssignmentGroup = keyof typeof ASSIGNMENT_GROUP_LABELS;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Quiz = any;
->>>>>>> 1eac11f (final)
 
 export default function QuizEditor() {
   const { cid, qid } = useParams<{ cid: string; qid: string }>();
   const router = useRouter();
 
-<<<<<<< HEAD
- const [quiz, setQuiz] = useState<QuizShape | null>(null);
-=======
   const [quiz, setQuiz] = useState<Quiz | null>(null);
->>>>>>> 1eac11f (final)
 
   const loadQuiz = async () => {
     if (!qid) return;
@@ -110,12 +84,8 @@ export default function QuizEditor() {
 
   if (!quiz) return <div>Loading...</div>;
 
-<<<<<<< HEAD
-  const updateField = (field: string, value: unknown) => {
-=======
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: string, value: any) => {
->>>>>>> 1eac11f (final)
     setQuiz({ ...quiz, [field]: value });
   };
 
@@ -168,26 +138,6 @@ export default function QuizEditor() {
         </Link>
       </div>
 
-<<<<<<< HEAD
-      <Form.Group className="mb-3">
-        <Form.Label className="fw-semibold">Quiz Title</Form.Label>
-        <Form.Control
-          type="text"
-          value={quiz.title as string}
-          onChange={(e) => updateField("title", e.target.value)}
-        />
-      </Form.Group>
-
-      <Form.Group className="mb-4">
-        <Form.Label className="fw-semibold">Quiz Instructions:</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={5}
-          value={quiz.description as string}
-          onChange={(e) => updateField("description", e.target.value)}
-        />
-      </Form.Group>
-=======
       <div className="d-flex justify-content-between align-items-end mb-3">
         <Form.Group className="flex-grow-1 me-4">
           <Form.Label className="fw-semibold">Quiz Title</Form.Label>
@@ -214,22 +164,16 @@ export default function QuizEditor() {
     />
   </div>
 </Form.Group>
->>>>>>> 1eac11f (final)
 
       <Card className="wd-quiz-card mb-4">
         <Card.Body>
           <Form.Group className="mb-3">
             <Form.Label className="fw-semibold">Quiz Type</Form.Label>
             <Form.Select
-<<<<<<< HEAD
-              value={quiz.quizType as string}
-              onChange={(e) => updateField("quizType", e.target.value)}
-=======
               value={quiz.quizType}
               onChange={(e) =>
                 updateField("quizType", e.target.value as QuizType)
               }
->>>>>>> 1eac11f (final)
             >
               <option value="GRADED">Graded Quiz</option>
               <option value="PRACTICE">Practice Quiz</option>
@@ -241,10 +185,6 @@ export default function QuizEditor() {
           <Form.Group className="mb-3">
             <Form.Label className="fw-semibold">Assignment Group</Form.Label>
             <Form.Select
-<<<<<<< HEAD
-              value={quiz.assignmentGroup as string}
-              onChange={(e) => updateField("assignmentGroup", e.target.value)}
-=======
               value={quiz.assignmentGroup}
               onChange={(e) =>
                 updateField(
@@ -252,7 +192,6 @@ export default function QuizEditor() {
                   e.target.value as AssignmentGroup
                 )
               }
->>>>>>> 1eac11f (final)
             >
               <option value="QUIZZES">Quizzes</option>
               <option value="EXAMS">Exams</option>
@@ -266,11 +205,7 @@ export default function QuizEditor() {
           <Form.Check
             type="checkbox"
             label="Shuffle Answers"
-<<<<<<< HEAD
-            checked={quiz.shuffleAnswers as boolean}
-=======
             checked={!!quiz.shuffleAnswers}
->>>>>>> 1eac11f (final)
             onChange={(e) => updateField("shuffleAnswers", e.target.checked)}
           />
 
@@ -301,15 +236,10 @@ export default function QuizEditor() {
           <Form.Check
             type="checkbox"
             label="Allow Multiple Attempts"
-<<<<<<< HEAD
-            checked={quiz.multipleAttempts as boolean}
-            onChange={(e) => updateField("multipleAttempts", e.target.checked)}
-=======
             checked={!!quiz.multipleAttempts}
             onChange={(e) =>
               updateField("multipleAttempts", e.target.checked)
             }
->>>>>>> 1eac11f (final)
           />
 
           {quiz.multipleAttempts && (
@@ -354,11 +284,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-3"
             label="One Question at a Time"
-<<<<<<< HEAD
-            checked={quiz.oneQuestionAtATime as boolean}
-=======
             checked={!!quiz.oneQuestionAtATime}
->>>>>>> 1eac11f (final)
             onChange={(e) =>
               updateField("oneQuestionAtATime", e.target.checked)
             }
@@ -368,11 +294,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-2"
             label="Webcam Required"
-<<<<<<< HEAD
-            checked={quiz.webcamRequired as boolean}
-=======
             checked={!!quiz.webcamRequired}
->>>>>>> 1eac11f (final)
             onChange={(e) => updateField("webcamRequired", e.target.checked)}
           />
 
@@ -380,11 +302,7 @@ export default function QuizEditor() {
             type="checkbox"
             className="mt-2"
             label="Lock Questions After Answering"
-<<<<<<< HEAD
-            checked={quiz.lockAfterAnswering as boolean}
-=======
             checked={!!quiz.lockAfterAnswering}
->>>>>>> 1eac11f (final)
             onChange={(e) =>
               updateField("lockAfterAnswering", e.target.checked)
             }
@@ -412,15 +330,10 @@ export default function QuizEditor() {
               <Form.Label>Available From</Form.Label>
               <Form.Control
                 type="datetime-local"
-<<<<<<< HEAD
-                value={(quiz.availableDate as string) || ""}
-                onChange={(e) => updateField("availableDate", e.target.value)}
-=======
                 value={quiz.availableDate || ""}
                 onChange={(e) =>
                   updateField("availableDate", e.target.value)
                 }
->>>>>>> 1eac11f (final)
               />
             </Col>
 
