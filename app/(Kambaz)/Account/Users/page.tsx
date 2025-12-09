@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PeopleTable from "../../Courses/[cid]/People/Table";
 import { FormControl } from "react-bootstrap";
+import { FaPlus } from "react-icons/fa";   
+import PeopleTable from "../../Courses/[cid]/People/Table";
 import * as client from "../client";
-import { FaPlus } from "react-icons/fa";
-import type { User } from "../../../(Kambaz)/type";
+import type { User } from "../client";
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const [role, setRole] = useState("");
-  const [name, setName] = useState("");
+  const [role, setRole] = useState<string>("");
+  const [name, setName] = useState<string>("");
+
+  const fetchUsers = async () => {
+    const allUsers = await client.findAllUsers();
+    setUsers(allUsers);
+  };
 
   const createUser = async () => {
     const user = await client.createUser({
@@ -25,28 +30,23 @@ export default function Users() {
     setUsers([...users, user]);
   };
 
-  const fetchUsers = async () => {
-    const users = await client.findAllUsers();
-    setUsers(users);
-  };
-
-  const filterUsersByRole = async (role: string) => {
-    setRole(role);
-    if (role) {
-      const users = await client.findUsersByRole(role);
-      setUsers(users);
+  const filterUsersByRole = async (newRole: string) => {
+    setRole(newRole);
+    if (newRole) {
+      const filtered = await client.findUsersByRole(newRole);
+      setUsers(filtered);
     } else {
-      fetchUsers();
+      await fetchUsers();
     }
   };
 
-  const filterUsersByName = async (name: string) => {
-    setName(name);
-    if (name) {
-      const users = await client.findUsersByPartialName(name);
-      setUsers(users);
+  const filterUsersByName = async (newName: string) => {
+    setName(newName);
+    if (newName.trim()) {
+      const filtered = await client.findUsersByPartialName(newName.trim());
+      setUsers(filtered);
     } else {
-      fetchUsers();
+      await fetchUsers();
     }
   };
 
@@ -56,6 +56,8 @@ export default function Users() {
 
   return (
     <div>
+      <h3>Users</h3>
+
       <button
         onClick={createUser}
         className="float-end btn btn-danger wd-add-people"
@@ -64,18 +66,17 @@ export default function Users() {
         Users
       </button>
 
-      <h3>Users</h3>
-
       <FormControl
+        value={name}
+        onChange={(e) => filterUsersByName(e.target.value)}
         placeholder="Search people"
         className="float-start w-25 me-2 wd-filter-by-name"
-        onChange={(e) => filterUsersByName(e.target.value)}
       />
 
       <select
         value={role}
         onChange={(e) => filterUsersByRole(e.target.value)}
-        className="form-select float-start w-25 wd-select-role mb-3"
+        className="form-select float-start w-25 wd-select-role"
       >
         <option value="">All Roles</option>
         <option value="STUDENT">Students</option>
@@ -83,6 +84,8 @@ export default function Users() {
         <option value="FACULTY">Faculty</option>
         <option value="ADMIN">Administrators</option>
       </select>
+
+      <div className="clearfix mb-3" />
 
       <PeopleTable users={users} fetchUsers={fetchUsers} />
     </div>

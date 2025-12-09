@@ -10,9 +10,14 @@ export default function AccountNavigation() {
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer
   );
-  const pathname = usePathname();
-  
-  const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
+  const pathname = usePathname().toLowerCase();
+
+  const isAuthPage =
+    pathname.startsWith("/account/signin") ||
+    pathname.startsWith("/account/signup") ||
+    pathname === "/account"; 
+
+  const links = !currentUser || isAuthPage ? ["Signin", "Signup"] : ["Profile"];
 
   return (
     <Nav
@@ -25,19 +30,19 @@ export default function AccountNavigation() {
           <NavLink
             as={Link}
             href={`/Account/${link}`}
-            active={pathname.toLowerCase().endsWith(link.toLowerCase())}
+            active={pathname.endsWith(link.toLowerCase())}
           >
             {link}
           </NavLink>
         </NavItem>
       ))}
 
-      {currentUser && currentUser.role === "ADMIN" && (
+      {currentUser && currentUser.role === "ADMIN" && !isAuthPage && (
         <NavItem key="Users">
           <NavLink
             as={Link}
             href="/Account/Users"
-            active={pathname.toLowerCase().endsWith("users")}
+            active={pathname.endsWith("users")}
           >
             Users
           </NavLink>

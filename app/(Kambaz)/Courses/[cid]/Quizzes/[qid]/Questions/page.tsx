@@ -25,6 +25,11 @@ const ReactQuill = dynamic<any>(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Question = any;
 
+type QuestionGroup = {
+  id: string;
+  name: string;
+};
+
 export default function QuizQuestionsEditor() {
   const { cid, qid } = useParams() as { cid: string; qid: string };
   const router = useRouter();
@@ -33,9 +38,18 @@ export default function QuizQuestionsEditor() {
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
 
+  const [groups, setGroups] = useState<QuestionGroup[]>([
+    { id: "default", name: "Group 1" },
+  ]);
+
+  const [questionBank, setQuestionBank] = useState<Question[]>([]);
+  const [showBank, setShowBank] = useState(false);
+  const [bankSearch, setBankSearch] = useState("");
+
   const loadQuiz = async () => {
     const data = await client.findQuiz(qid);
     setQuiz(data);
+
     const qs = (data.questions || []).map((q: Question) => ({
       ...q,
       editing: false,
@@ -43,6 +57,32 @@ export default function QuizQuestionsEditor() {
       isNew: false,
     }));
     setQuestions(qs);
+
+    setQuestionBank(data.questions || []);
+
+    if (data.questionGroups) {
+      setGroups(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.questionGroups.map((g: any) => ({
+          id: g.id,
+          name: g.name
+        }))
+      );
+    
+      setQuestions((prev) =>
+        prev.map(q => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const found = data.questionGroups.find((g: any) =>
+            g.questionIds.includes(q._id)
+          );
+          return {
+            ...q,
+            groupId: found ? found.id : null
+          };
+        })
+      );
+    }
+    
   };
 
   useEffect(() => {
@@ -61,7 +101,7 @@ export default function QuizQuestionsEditor() {
     const newQuestion: Question = {
       _id: Date.now().toString(),
       title: "New Question",
-      type: "multiple", 
+      type: "multiple",
       points: 1,
       text: "",
       correctAnswer: "",
@@ -69,6 +109,7 @@ export default function QuizQuestionsEditor() {
       editing: true,
       backup: undefined,
       isNew: true,
+      groupId: groups[0]?.id ?? null,
     };
 
     setQuestions((prev) => [...prev, newQuestion]);
@@ -84,7 +125,7 @@ export default function QuizQuestionsEditor() {
         updated[index] = {
           ...q,
           editing: true,
-          backup: snapshot, 
+          backup: snapshot,
         };
       } else {
         updated[index] = { ...q, editing: true };
@@ -128,13 +169,19 @@ export default function QuizQuestionsEditor() {
     setQuestions(finalized);
 
     const cleaned = buildCleanQuestions(finalized);
-
     const totalPoints = computeTotalPoints(cleaned);
 
     const updatedQuiz = {
       ...quiz,
       questions: cleaned,
       points: totalPoints,
+      questionGroups: groups.map(g => ({
+        id: g.id,
+        name: g.name,
+        questionIds: cleaned
+          .filter(q => q.groupId === g.id)
+          .map(q => q._id)
+      }))
     };
 
     await client.updateQuiz(qid, updatedQuiz);
@@ -154,13 +201,19 @@ export default function QuizQuestionsEditor() {
     const finalized = questions.map((q) => ({ ...q, editing: false }));
 
     const cleaned = buildCleanQuestions(finalized);
-
     const totalPoints = computeTotalPoints(cleaned);
 
     const updatedQuiz = {
       ...quiz,
       questions: cleaned,
       points: totalPoints,
+      questionGroups: groups.map(g => ({
+        id: g.id,
+        name: g.name,
+        questionIds: cleaned
+          .filter(q => q.groupId === g.id)
+          .map(q => q._id)
+      }))
     };
 
     await client.updateQuiz(qid, updatedQuiz);
@@ -177,6 +230,18 @@ export default function QuizQuestionsEditor() {
   };
 
   const totalPoints = computeTotalPoints(questions);
+
+  const addQuestionFromBank = (bankQuestion: Question) => {
+    const cloned: Question = {
+      ...bankQuestion,
+      _id: Date.now().toString() + Math.random().toString(16).slice(2),
+      editing: false,
+      backup: undefined,
+      isNew: true,
+      groupId: groups[0]?.id ?? null,
+    };
+    setQuestions((prev) => [...prev, cloned]);
+  };
 
   return (
     <div className="wd-qq-container">
@@ -197,7 +262,31 @@ export default function QuizQuestionsEditor() {
         <div className="wd-points-display">Points {totalPoints}</div>
       </div>
 
-      <div className="wd-new-question-container mb-3">
+      <div className="mb-3 d-flex gap-2 align-items-center">
+        <span className="fw-bold">Question Groups:</span>
+        {groups.map((g) => (
+          <span key={g.id} className="badge bg-secondary me-1">
+            {g.name}
+          </span>
+        ))}
+        <Button
+          size="sm"
+          variant="outline-secondary"
+          onClick={() =>
+            setGroups((prev) => [
+              ...prev,
+              {
+                id: `g-${Date.now()}`,
+                name: `Group ${prev.length + 1}`,
+              },
+            ])
+          }
+        >
+          + Add Group
+        </Button>
+      </div>
+
+      <div className="wd-new-question-container mb-3 d-flex gap-2">
         <Button
           variant="light"
           className="wd-new-question-btn"
@@ -205,7 +294,73 @@ export default function QuizQuestionsEditor() {
         >
           + New Question
         </Button>
+
+        <Button
+          variant="outline-secondary"
+          onClick={() => setShowBank((s) => !s)}
+        >
+          Find Questions
+        </Button>
       </div>
+
+      {showBank && (
+        <Card className="mb-3">
+          <Card.Body>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <strong>Question Bank</strong>
+              <Button
+                size="sm"
+                variant="outline-secondary"
+                onClick={() => setShowBank(false)}
+              >
+                Close
+              </Button>
+            </div>
+
+            <Form.Control
+              type="text"
+              placeholder="Search questions..."
+              className="mb-2"
+              value={bankSearch}
+              onChange={(e) => setBankSearch(e.target.value)}
+            />
+
+            {questionBank
+              .filter((qb) =>
+                (qb.title || "")
+                  .toLowerCase()
+                  .includes(bankSearch.toLowerCase())
+              )
+              .map((qb) => (
+                <div
+                  key={qb._id}
+                  className="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <div>
+                    <div className="fw-bold">{qb.title || "(Untitled)"}</div>
+                    <div className="text-muted">
+                      {qb.type} — {qb.points ?? 0} pts
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => addQuestionFromBank(qb)}
+                  >
+                    Add to Quiz
+                  </Button>
+                </div>
+              ))}
+
+            {questionBank.length === 0 && (
+              <div className="text-muted fst-italic">
+                No questions in the bank yet.
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      )}
 
       {questions.length === 0 && (
         <div className="text-muted fst-italic mb-3">
@@ -230,6 +385,13 @@ export default function QuizQuestionsEditor() {
                         : "Fill in the Blank"}{" "}
                       — {q.points} pts
                     </div>
+                    {q.groupId && (
+                      <div className="text-muted">
+                        Group:{" "}
+                        {groups.find((g) => g.id === q.groupId)?.name ||
+                          "Unknown"}
+                      </div>
+                    )}
                   </Col>
 
                   <Col sm="auto">
@@ -316,6 +478,29 @@ export default function QuizQuestionsEditor() {
                         )
                       }
                     />
+                  </Col>
+                </Row>
+
+                <Row className="mb-3">
+                  <Col sm={6}>
+                    <Form.Label className="fw-bold">Question Group</Form.Label>
+                    <Form.Select
+                      value={q.groupId || ""}
+                      onChange={(e) =>
+                        updateQuestionField(
+                          index,
+                          "groupId",
+                          e.target.value || null
+                        )
+                      }
+                    >
+                      <option value="">No Group</option>
+                      {groups.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </Col>
                 </Row>
 
@@ -423,11 +608,7 @@ export default function QuizQuestionsEditor() {
                       name={`tf-${index}`}
                       checked={q.correctAnswer === "true"}
                       onChange={() =>
-                        updateQuestionField(
-                          index,
-                          "correctAnswer",
-                          "true"
-                        )
+                        updateQuestionField(index, "correctAnswer", "true")
                       }
                     />
 
@@ -437,11 +618,7 @@ export default function QuizQuestionsEditor() {
                       name={`tf-${index}`}
                       checked={q.correctAnswer === "false"}
                       onChange={() =>
-                        updateQuestionField(
-                          index,
-                          "correctAnswer",
-                          "false"
-                        )
+                        updateQuestionField(index, "correctAnswer", "false")
                       }
                     />
                   </div>
@@ -533,20 +710,20 @@ export default function QuizQuestionsEditor() {
         </Card>
       ))}
 
-<div className="wd-buttons-row mt-4 d-flex gap-2">
-  <Button variant="danger" onClick={saveAll}>
-    Save All Changes
-  </Button>
+      <div className="wd-buttons-row mt-4 d-flex gap-2">
+        <Button variant="danger" onClick={saveAll}>
+          Save All Changes
+        </Button>
 
-  <Button
-    variant="primary"
-    onClick={() =>
-      router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)
-    }
-  >
-    Preview Quiz
-  </Button>
-</div>
+        <Button
+          variant="primary"
+          onClick={() =>
+            router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)
+          }
+        >
+          Preview Quiz
+        </Button>
+      </div>
     </div>
   );
 }

@@ -52,7 +52,6 @@ export default function CoursesLayout({
           style={{ cursor: "pointer" }}
           onClick={() => setShowSidebar(!showSidebar)}
         />
-        {course?.name}
         <Breadcrumb course={course} />
       </h2>
       <hr />

@@ -125,11 +125,11 @@ export default function QuizDetailsPage() {
           </>
         )}
 
-        {isStudent && (
-          <Link href={`/Courses/${cid}/Quizzes/${qid}/Preview`}>
-            <Button className="wd-quiz-btn-start">Start Quiz</Button>
-          </Link>
-        )}
+{isStudent && (
+  <Link href={`/Courses/${cid}/Quizzes/${qid}/Start`}>
+    <Button className="wd-quiz-btn-start">Start Quiz</Button>
+  </Link>
+)}
       </div>
 
       <div className="wd-quiz-title-box">

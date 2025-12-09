@@ -42,6 +42,7 @@ export default function Signin() {
       marginTop: "-30px",
     }}>
 
+      {/* Title */}
       <h1
         className="mb-4"
         style={{
@@ -57,6 +58,7 @@ export default function Signin() {
         <div className="text-danger mb-3 small">{error}</div>
       )}
 
+      {/* Username */}
       <label className="fw-semibold mt-3">
         myNortheastern Username
       </label>
@@ -69,6 +71,7 @@ export default function Signin() {
         }
       />
 
+      {/* Password */}
       <label className="fw-semibold">
         myNortheastern Password
       </label>
@@ -82,6 +85,7 @@ export default function Signin() {
         }
       />
 
+      {/* Login button */}
       <Button
         onClick={handleSignin}
         className="mb-2"
